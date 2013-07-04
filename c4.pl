@@ -1,3 +1,5 @@
+board_width(7).
+
 print_board([]).
 print_board([ TOPROW | REST ]) :-
 	format('~p~n', [TOPROW]), print_board(REST).
@@ -39,16 +41,19 @@ collect_left(ROW, X, PLAYER, COUNT) :-
 collect_left(_, 0, _, COUNT) :-
 	COUNT = 0.
 
+collect_right(ROW, X, PLAYER, COUNT) :-
+	reverse(ROW, ROW_R),
+	board_width(WIDTH),
+	XR is (WIDTH + 1) - X,	% compute new offset
+	collect_left(ROW_R, XR, PLAYER, COUNT).
+
 % Count the number of tokens to the left of the same colour
 find_consecutive(BOARD, X, Y, PLAYER) :-
 	format("Check consecutive~n"),
 	get_row(BOARD, Y, ROW),
 	collect_left(ROW, X, PLAYER, COUNT_LEFT),
 	format("LEFT: ~p~n", [COUNT_LEFT]),
-	% To search right, reverse the list and collect left
-	reverse(ROW, ROW_R),
-	XR is 8 - X,	% compute new offset
-	collect_left(ROW_R, XR, PLAYER, COUNT_RIGHT),
+	collect_right(ROW, X, PLAYER, COUNT_RIGHT),
 	format("RIGHT: ~p~n",[COUNT_RIGHT]),
 	COUNT_TOT is COUNT_LEFT + COUNT_RIGHT -1, % start counted twice,
 	format("TOTAL: ~p~n", [COUNT_TOT]),
