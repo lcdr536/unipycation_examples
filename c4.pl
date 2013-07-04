@@ -15,17 +15,23 @@ get_col(N, [TOPROW | OTHERROWS], OUT) :-
 
 % Although they hold different meaning, are the same.
 get_elem(N, ROW, OUT) :- get_row(N, ROW, OUT).
+
+get_at(X, Y, BOARD, E) :-
+	get_row(Y, BOARD, ROW),
+	get_elem(X, ROW, E).
 	
-has_won(_, _, WON) :-
-	WON = true.
+% XXX fill this in
+has_won(BOARD, PLAYER) :-
+	PLAYER = PLAYER,
+	BOARD = BOARD. % Just to silence compiler for now
 	
-main(STOP) :-
-	BOARD = [[1, 0, 0, 0, 0, 0, 0],
-		 [0, 1, 0, 0, 0, 0, 0],
-		 [0, 0, 1, 0, 0, 0, 0],
+main :-
+	BOARD = [[0, 0, 0, 0, 0, 0, 0],
+		 [0, 0, 0, 0, 0, 0, 0],
+		 [0, 0, 0, 0, 0, 0, 0],
 		 [0, 0, 0, 1, 0, 0, 0],
-		 [0, 0, 0, 0, 1, 0, 0],
+		 [0, 0, 0, 2, 1, 0, 0],
 		 [0, 1, 1, 1, 1, 2, 0]],
-	 get_col(1, BOARD, OUT),
-	 format('~p~n', [OUT]),
-	 has_won(BOARD, 1, STOP).
+	 get_at(4, 6, BOARD, EL),
+	 format('~p~n', [EL]),
+	 (has_won(BOARD, 1); has_won(BOARD, 2)).
