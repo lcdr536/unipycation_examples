@@ -22,7 +22,6 @@ get_at(BOARD, X, Y, E) :-
 	get_row(BOARD, Y, ROW),
 	get_elem(ROW, X, E).
 
-
 collect_left(ROW, X, PLAYER, COUNT) :-
 	get_elem(ROW, X, E),
 	format("Collect left (~p) ~p = ~p~n", [X, E, PLAYER]),
@@ -69,6 +68,7 @@ search_row(BOARD, X, Y, [_ | T], PLAYER) :-	% no match head
 
 search(BOARD, Y, [TOPROW | _], PLAYER) :- % match in this row
 	search_row(BOARD, 1, Y, TOPROW, PLAYER).
+
 search(BOARD, Y, [_ | OTHERROWS], PLAYER) :- % Search other rows
 	YP is Y + 1,
 	search(BOARD, YP, OTHERROWS, PLAYER).
@@ -83,4 +83,5 @@ main :-
 		 [0, 0, 0, 1, 0, 0, 0],
 		 [0, 0, 0, 2, 1, 0, 0],
 		 [0, 1, 1, 1, 1, 2, 0]],
-	 (has_won(BOARD, 1); has_won(BOARD, 2)).
+	 (has_won(BOARD, 1), format("Player one wins~n");
+	  has_won(BOARD, 2), format("Player two wins~n")).
