@@ -32,6 +32,4 @@ main :-
 		 [0, 0, 0, 1, 0, 0, 0],
 		 [0, 0, 0, 2, 1, 0, 0],
 		 [0, 1, 1, 1, 1, 2, 0]],
-	 get_at(4, 6, BOARD, EL),
-	 format('~p~n', [EL]),
 	 (has_won(BOARD, 1); has_won(BOARD, 2)).
