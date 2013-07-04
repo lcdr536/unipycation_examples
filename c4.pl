@@ -2,23 +2,23 @@ print_board([]).
 print_board([ TOPROW | REST ]) :-
 	format('~p~n', [TOPROW]), print_board(REST).
 
-get_row(1, [TOPROW | _], TOPROW).
-get_row(N, [_ | REST], OUT) :-
+get_row([TOPROW | _], 1, TOPROW).
+get_row([_ | REST], N, OUT) :-
 	NP is N - 1,
-	get_row(NP, REST, OUT).
+	get_row(REST, NP, OUT).
 
-get_col(_, [], []).
-get_col(N, [TOPROW | OTHERROWS], OUT) :-
-	get_col(N, OTHERROWS, OTHERNEW),
-	get_elem(N, TOPROW, NEW),
+get_col([], _, []).
+get_col([TOPROW | OTHERROWS], N, OUT) :-
+	get_col(OTHERROWS, N, OTHERNEW),
+	get_elem(TOPROW, N, NEW),
 	OUT = [ NEW | OTHERNEW ].
 
 % Although they hold different meaning, are the same.
-get_elem(N, ROW, OUT) :- get_row(N, ROW, OUT).
+get_elem(ROW, N, OUT) :- get_row(ROW, N, OUT).
 
-get_at(X, Y, BOARD, E) :-
-	get_row(Y, BOARD, ROW),
-	get_elem(X, ROW, E).
+get_at(BOARD, X, Y, E) :-
+	get_row(BOARD, Y, ROW),
+	get_elem(ROW, X, E).
 
 search_row(_, X, Y, [PLAYER | _], PLAYER) :-
 	format("Match for player ~p found at (~p, ~p)~n", [PLAYER, X, Y]).
