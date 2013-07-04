@@ -19,11 +19,22 @@ get_elem(N, ROW, OUT) :- get_row(N, ROW, OUT).
 get_at(X, Y, BOARD, E) :-
 	get_row(Y, BOARD, ROW),
 	get_elem(X, ROW, E).
+
+search_row(_, X, Y, [PLAYER | _], PLAYER) :-
+	format("Match for player ~p found at (~p, ~p)~n", [PLAYER, X, Y]).
+
+search_row(BOARD, X, Y, [_ | T], PLAYER) :-	% no match head
+	XP is X + 1,
+	search_row(BOARD, XP, Y, T, PLAYER).
+
+search(BOARD, Y, [TOPROW | _], PLAYER) :- % match in this row
+	search_row(BOARD, 1, Y, TOPROW, PLAYER).
+search(BOARD, Y, [_ | OTHERROWS], PLAYER) :- % Search other rows
+	YP is Y + 1,
+	search(BOARD, YP, OTHERROWS, PLAYER).
 	
-% XXX fill this in
 has_won(BOARD, PLAYER) :-
-	PLAYER = PLAYER,
-	BOARD = BOARD. % Just to silence compiler for now
+	search(BOARD, 1, BOARD, PLAYER).
 	
 main :-
 	BOARD = [[0, 0, 0, 0, 0, 0, 0],
