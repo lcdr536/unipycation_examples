@@ -2,7 +2,7 @@ print_board([]).
 print_board([ TOPROW | REST ]) :-
 	format('~p~n', [TOPROW]), print_board(REST).
 
-get_row([TOPROW | _], 1, TOPROW).
+get_row([TOPROW | _], 1, TOPROW) :- !.
 get_row([_ | REST], N, OUT) :-
 	NP is N - 1,
 	get_row(REST, NP, OUT).
@@ -20,10 +20,6 @@ get_at(BOARD, X, Y, E) :-
 	get_row(BOARD, Y, ROW),
 	get_elem(ROW, X, E).
 
-collect_left(ROW, X, PLAYER, COUNT) :-
-	get_elem(ROW, X, E),
-	E \= PLAYER,
-	COUNT = 0.
 
 collect_left(ROW, X, PLAYER, COUNT) :-
 	get_elem(ROW, X, E),
@@ -34,17 +30,33 @@ collect_left(ROW, X, PLAYER, COUNT) :-
 	collect_left(ROW, XP, PLAYER, COUNTP),
 	COUNT is COUNTP + 1.
 
+collect_left(ROW, X, PLAYER, COUNT) :-
+	get_elem(ROW, X, E),
+	E \= PLAYER,
+	COUNT = 0.
+
+% If we fall of the left edge, stop searching
+collect_left(_, 0, _, COUNT) :-
+	COUNT = 0.
+
 % Count the number of tokens to the left of the same colour
-horizontal_win(BOARD, X, Y, PLAYER) :-
-	format("Check horizontal win~n"),
+find_consecutive(BOARD, X, Y, PLAYER) :-
+	format("Check consecutive~n"),
 	get_row(BOARD, Y, ROW),
 	collect_left(ROW, X, PLAYER, COUNT_LEFT),
-	format("LEFT: ~p~n", [COUNT_LEFT]).
-	%COUNT_LEFT >= 4.
+	format("LEFT: ~p~n", [COUNT_LEFT]),
+	% To search right, reverse the list and collect left
+	reverse(ROW, ROW_R),
+	XR is 8 - X,	% compute new offset
+	collect_left(ROW_R, XR, PLAYER, COUNT_RIGHT),
+	format("RIGHT: ~p~n",[COUNT_RIGHT]),
+	COUNT_TOT is COUNT_LEFT + COUNT_RIGHT -1, % start counted twice,
+	format("TOTAL: ~p~n", [COUNT_TOT]),
+	COUNT_TOT >= 4.
 
 search_row(BOARD, X, Y, [PLAYER | _], PLAYER) :-
 	format("Match for player ~p found at (~p, ~p)~n", [PLAYER, X, Y]),
-	horizontal_win(BOARD, X, Y, PLAYER).
+	find_consecutive(BOARD, X, Y, PLAYER).
 
 search_row(BOARD, X, Y, [_ | T], PLAYER) :-	% no match head
 	XP is X + 1,
