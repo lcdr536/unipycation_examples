@@ -41,19 +41,6 @@ get_rl_diag(BOARD, X, Y, SEQ) :-
 get_rl_diag(_, X, _, []) :- X =< 1.
 get_rl_diag(_, _, Y, []) :- board_height(BH), Y >= BH.
 
-%min(X, Y, X) :- X =< Y.
-%min(X, Y, Y) :- Y =< X.
-
-%get_lr_diag_root(X, Y, XP, YP) :-
-%        min(X, Y, MIN),
-%        XP is X - (MIN - 1),
-%        YP is Y - (MIN - 1).
-
-%get_lr_diag_root(X, Y, XP, YP) :-
-%X >= 1, Y >= 1,
-%XN is X - 1, YN is Y - 1,
-%get_lr_diag_root(BOARD, 
-
 % Although they hold different meaning, are the same.
 get_elem(ROW, N, OUT) :- get_row(ROW, N, OUT).
 
@@ -63,10 +50,7 @@ get_at(BOARD, X, Y, E) :-
 
 collect_left(ROW, X, PLAYER, COUNT) :-
 	get_elem(ROW, X, E),
-	format("Collect left (~p) ~p = ~p~n", [X, E, PLAYER]),
-	E = PLAYER,
-	format("Yep~n"),
-	XP is X - 1,
+	E = PLAYER, XP is X - 1,
 	collect_left(ROW, XP, PLAYER, COUNTP),
 	COUNT is COUNTP + 1.
 
@@ -88,31 +72,28 @@ collect_right(ROW, X, PLAYER, COUNT) :-
 % Count the number of tokens to the left of the same colour
 %find_consecutive(BOARD, X, Y, PLAYER) :-
 find_consecutive(SEQ, X, PLAYER) :-
-	format("Check consecutive~n"),
-        % No need to collect left, will be eventually found
-        %collect_left(SEQ, X, PLAYER, COUNT_LEFT),
-        %format("LEFT: ~p~n", [COUNT_LEFT]),
 	collect_right(SEQ, X, PLAYER, COUNT_RIGHT),
-	format("RIGHT: ~p~n",[COUNT_RIGHT]),
-        %COUNT_TOT is COUNT_LEFT + COUNT_RIGHT -1, % start counted twice,
-        %format("TOTAL: ~p~n", [COUNT_TOT]),
 	COUNT_RIGHT >= 4.
 
 check_win_horiz(BOARD, X, Y, PLAYER) :-
         get_row(BOARD, Y, ROW),
-	find_consecutive(ROW, X, PLAYER).
+	find_consecutive(ROW, X, PLAYER),
+        format("Horizontal win @ (~p, ~p) for player ~p~n", [X, Y, PLAYER]).
 
 check_win_vert(BOARD, X, Y, PLAYER) :-
         get_col(BOARD, X, COL),
-	find_consecutive(COL, Y, PLAYER).
+	find_consecutive(COL, Y, PLAYER),
+        format("Vertical win @ (~p, ~p) for player ~p~n", [X, Y, PLAYER]).
 
 check_win_lr_diag(BOARD, X, Y, PLAYER) :-
         get_lr_diag(BOARD, X, Y, DIAG),
-	find_consecutive(DIAG, 1, PLAYER).
+	find_consecutive(DIAG, 1, PLAYER),
+        format("LR diagonal win @ (~p, ~p) for player ~p~n", [X, Y, PLAYER]).
 
 check_win_rl_diag(BOARD, X, Y, PLAYER) :-
         get_rl_diag(BOARD, X, Y, DIAG),
-	find_consecutive(DIAG, 1, PLAYER).
+	find_consecutive(DIAG, 1, PLAYER),
+        format("RL diagonal win @ (~p, ~p) for player ~p~n", [X, Y, PLAYER]).
 
 check_win(BOARD, X, Y, PLAYER) :- check_win_horiz(BOARD, X, Y, PLAYER).
 check_win(BOARD, X, Y, PLAYER) :- check_win_vert(BOARD, X, Y, PLAYER).
@@ -120,7 +101,6 @@ check_win(BOARD, X, Y, PLAYER) :- check_win_lr_diag(BOARD, X, Y, PLAYER).
 check_win(BOARD, X, Y, PLAYER) :- check_win_rl_diag(BOARD, X, Y, PLAYER).
 
 search_row(BOARD, X, Y, [PLAYER | _], PLAYER) :-
-	format("Match for player ~p found at (~p, ~p)~n", [PLAYER, X, Y]),
         check_win(BOARD, X, Y, PLAYER).
 
 search_row(BOARD, X, Y, [_ | T], PLAYER) :-	% no match head
