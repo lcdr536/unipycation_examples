@@ -1,4 +1,5 @@
 board_width(7).
+board_height(6).
 
 print_board([]).
 print_board([ TOPROW | REST ]) :-
@@ -14,6 +15,33 @@ get_col([TOPROW | OTHERROWS], N, OUT) :-
 	get_col(OTHERROWS, N, OTHERNEW),
 	get_elem(TOPROW, N, NEW),
 	OUT = [ NEW | OTHERNEW ].
+
+get_lr_diag(BOARD, X, Y, SEQ) :-
+        board_width(BW), board_height(BH),
+        X =< BW, Y =< BH,
+        XN is X + 1, YN is Y + 1,
+        get_lr_diag(BOARD, XN, YN, SEQP),
+        get_at(BOARD, X, Y, E),
+        SEQ = [ E | SEQP ].
+
+get_lr_diag(_, X, _, []) :-
+        board_width(BW), X >= BW.
+
+get_lr_diag(_, _, Y, []) :-
+        board_height(BH), Y >= BH.
+
+min(X, Y, X) :- X =< Y.
+min(X, Y, Y) :- Y =< X.
+
+get_lr_diag_root(X, Y, XP, YP) :-
+        min(X, Y, MIN),
+        XP is X - (MIN - 1),
+        YP is Y - (MIN - 1).
+
+%get_lr_diag_root(X, Y, XP, YP) :-
+%X >= 1, Y >= 1,
+%XN is X - 1, YN is Y - 1,
+%get_lr_diag_root(BOARD, 
 
 % Although they hold different meaning, are the same.
 get_elem(ROW, N, OUT) :- get_row(ROW, N, OUT).
@@ -42,8 +70,8 @@ collect_left(_, 0, _, COUNT) :-
 
 collect_right(ROW, X, PLAYER, COUNT) :-
 	reverse(ROW, ROW_R),
-	board_width(WIDTH),
-	XR is (WIDTH + 1) - X,	% compute new offset
+	length(ROW, LEN),
+	XR is (LEN + 1) - X,	% compute new offset
 	collect_left(ROW_R, XR, PLAYER, COUNT).
 
 % Count the number of tokens to the left of the same colour
@@ -67,8 +95,14 @@ check_win_vert(BOARD, X, Y, PLAYER) :-
         get_col(BOARD, X, COL),
 	find_consecutive(COL, Y, PLAYER).
 
+check_win_lr_diag(BOARD, X, Y, PLAYER) :-
+        X = 2, Y = 3, % XXX
+        get_lr_diag(BOARD, X, Y, DIAG),
+	find_consecutive(DIAG, 1, PLAYER).
+
 check_win(BOARD, X, Y, PLAYER) :- check_win_horiz(BOARD, X, Y, PLAYER).
 check_win(BOARD, X, Y, PLAYER) :- check_win_vert(BOARD, X, Y, PLAYER).
+check_win(BOARD, X, Y, PLAYER) :- check_win_lr_diag(BOARD, X, Y, PLAYER).
 
 search_row(BOARD, X, Y, [PLAYER | _], PLAYER) :-
 	format("Match for player ~p found at (~p, ~p)~n", [PLAYER, X, Y]),
@@ -89,11 +123,11 @@ has_won(BOARD, PLAYER) :-
 	search(BOARD, 1, BOARD, PLAYER).
 	
 main :-
-	BOARD = [[1, 1, 1, 1, 0, 0, 0],
+	BOARD = [[1, 0, 1, 1, 0, 0, 0],
 		 [0, 0, 0, 0, 0, 0, 0],
-		 [0, 0, 0, 0, 0, 0, 0],
-		 [0, 0, 0, 1, 1, 0, 0],
-		 [0, 0, 0, 2, 1, 0, 0],
+		 [0, 1, 0, 0, 0, 1, 0],
+		 [0, 0, 1, 0, 0, 0, 0],
+		 [0, 0, 0, 1, 0, 0, 0],
 		 [0, 0, 1, 1, 1, 2, 0]],
-	 (has_won(BOARD, 1), format("Player one wins~n");
-	  has_won(BOARD, 2), format("Player two wins~n")).
+         (has_won(BOARD, 1), format("Player one wins~n");
+         has_won(BOARD, 2), format("Player two wins~n")).
