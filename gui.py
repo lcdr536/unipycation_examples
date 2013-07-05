@@ -12,27 +12,29 @@ class TokenGen(object):
 
     def next(self):
         self.state = not self.state
-        return self.state
+        return "red" if self.state else "yellow"
 
-def insert_token(cols, colno):
+def insert_token(cols, tokgen, colno):
+
     for but in reversed(cols[colno]):
-        if but["text"] != "*":
-            but["text"] = "*"
+        if but["background"] not in ["red", "yellow"]:
+            but["background"] = tokgen.next()
             break
     else:
-        print("NOPE FULL")
+        tokgen.next() # simulates "try again"
 
-def token_click_closure(cols, colno):
-        return lambda : insert_token(cols, colno)
+def token_click_closure(cols, tokgen, colno):
+        return lambda : insert_token(cols, tokgen, colno)
 
 def make_gui():
     top = tk.Tk()
+    tokgen = TokenGen()
 
     cols = []
     for colno in range(COLS):
         col = []
 
-        b = tk.Button(top, text=str(colno), command=token_click_closure(cols, colno))
+        b = tk.Button(top, text=str(colno), command=token_click_closure(cols, tokgen, colno))
         b.grid(column=colno, row=0)
 
         for rowno in range(ROWS):
