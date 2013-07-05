@@ -48,29 +48,23 @@ get_at(BOARD, X, Y, E) :-
 	get_row(BOARD, Y, ROW),
 	get_elem(ROW, X, E).
 
-collect_left(ROW, X, PLAYER, COUNT) :-
+collect_right(ROW, X, PLAYER, COUNT) :-
 	get_elem(ROW, X, E),
-	E = PLAYER, XP is X - 1,
-	collect_left(ROW, XP, PLAYER, COUNTP),
+	E = PLAYER, XP is X + 1,
+	collect_right(ROW, XP, PLAYER, COUNTP),
 	COUNT is COUNTP + 1.
 
-collect_left(ROW, X, PLAYER, COUNT) :-
+collect_right(ROW, X, PLAYER, COUNT) :-
 	get_elem(ROW, X, E),
 	E \= PLAYER,
 	COUNT = 0.
 
-% If we fall of the left edge, stop searching
-collect_left(_, 0, _, COUNT) :-
+% If we fall of the edge, stop searching
+collect_right(SEQ, X, _, COUNT) :-
+        length(SEQ, LEN), X =:= LEN + 1,
 	COUNT = 0.
 
-collect_right(ROW, X, PLAYER, COUNT) :-
-	reverse(ROW, ROW_R),
-	length(ROW, LEN),
-	XR is (LEN + 1) - X,	% compute new offset
-	collect_left(ROW_R, XR, PLAYER, COUNT).
-
 % Count the number of tokens to the left of the same colour
-%find_consecutive(BOARD, X, Y, PLAYER) :-
 find_consecutive(SEQ, X, PLAYER) :-
 	collect_right(SEQ, X, PLAYER, COUNT_RIGHT),
 	COUNT_RIGHT >= 4.
@@ -81,6 +75,7 @@ check_win_horiz(BOARD, X, Y, PLAYER) :-
         format("Horizontal win @ (~p, ~p) for player ~p~n", [X, Y, PLAYER]).
 
 check_win_vert(BOARD, X, Y, PLAYER) :-
+        X = 2, Y = 2,
         get_col(BOARD, X, COL),
 	find_consecutive(COL, Y, PLAYER),
         format("Vertical win @ (~p, ~p) for player ~p~n", [X, Y, PLAYER]).
@@ -103,14 +98,14 @@ check_win(BOARD, X, Y, PLAYER) :- check_win_rl_diag(BOARD, X, Y, PLAYER).
 search_row(BOARD, X, Y, [PLAYER | _], PLAYER) :-
         check_win(BOARD, X, Y, PLAYER).
 
-search_row(BOARD, X, Y, [_ | T], PLAYER) :-	% no match head
+search_row(BOARD, X, Y, [_ | T], PLAYER) :-
 	XP is X + 1,
 	search_row(BOARD, XP, Y, T, PLAYER).
 
-search(BOARD, Y, [TOPROW | _], PLAYER) :- % match in this row
+search(BOARD, Y, [TOPROW | _], PLAYER) :-
 	search_row(BOARD, 1, Y, TOPROW, PLAYER).
 
-search(BOARD, Y, [_ | OTHERROWS], PLAYER) :- % Search other rows
+search(BOARD, Y, [_ | OTHERROWS], PLAYER) :-
 	YP is Y + 1,
 	search(BOARD, YP, OTHERROWS, PLAYER).
 	
@@ -118,11 +113,13 @@ has_won(BOARD, PLAYER) :-
 	search(BOARD, 1, BOARD, PLAYER).
 	
 main :-
+        % The board is not checked to be valid
+        % The ui can do that.
 	BOARD = [[1, 0, 1, 1, 0, 0, 0],
-		 [0, 0, 1, 0, 0, 0, 0],
+		 [0, 1, 0, 0, 0, 0, 0],
 		 [0, 1, 0, 0, 0, 1, 0],
                  [1, 0, 0, 0, 1, 0, 0],
-		 [0, 0, 0, 0, 0, 0, 0],
-		 [0, 0, 1, 1, 1, 2, 0]],
+		 [0, 1, 0, 0, 0, 0, 0],
+		 [0, 1, 1, 1, 1, 2, 0]],
          (has_won(BOARD, 1), format("Player one wins~n");
          has_won(BOARD, 2), format("Player two wins~n")).
