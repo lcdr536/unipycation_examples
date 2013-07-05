@@ -33,10 +33,10 @@ get_lr_diag(_, _, Y, []) :-
 min(X, Y, X) :- X =< Y.
 min(X, Y, Y) :- Y =< X.
 
-get_lr_diag_root(X, Y, XP, YP) :-
-        min(X, Y, MIN),
-        XP is X - (MIN - 1),
-        YP is Y - (MIN - 1).
+%get_lr_diag_root(X, Y, XP, YP) :-
+%        min(X, Y, MIN),
+%        XP is X - (MIN - 1),
+%        YP is Y - (MIN - 1).
 
 %get_lr_diag_root(X, Y, XP, YP) :-
 %X >= 1, Y >= 1,
@@ -96,7 +96,6 @@ check_win_vert(BOARD, X, Y, PLAYER) :-
 	find_consecutive(COL, Y, PLAYER).
 
 check_win_lr_diag(BOARD, X, Y, PLAYER) :-
-        X = 2, Y = 3, % XXX
         get_lr_diag(BOARD, X, Y, DIAG),
 	find_consecutive(DIAG, 1, PLAYER).
 
