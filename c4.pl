@@ -30,8 +30,19 @@ get_lr_diag(_, X, _, []) :-
 get_lr_diag(_, _, Y, []) :-
         board_height(BH), Y >= BH.
 
-min(X, Y, X) :- X =< Y.
-min(X, Y, Y) :- Y =< X.
+get_rl_diag(BOARD, X, Y, SEQ) :-
+        board_height(BH),
+        X >= 1, Y =< BH,
+        XN is X - 1, YN is Y + 1,
+        get_rl_diag(BOARD, XN, YN, SEQP),
+        get_at(BOARD, X, Y, E),
+        SEQ = [ E | SEQP ].
+
+get_rl_diag(_, X, _, []) :- X =< 1.
+get_rl_diag(_, _, Y, []) :- board_height(BH), Y >= BH.
+
+%min(X, Y, X) :- X =< Y.
+%min(X, Y, Y) :- Y =< X.
 
 %get_lr_diag_root(X, Y, XP, YP) :-
 %        min(X, Y, MIN),
@@ -99,9 +110,14 @@ check_win_lr_diag(BOARD, X, Y, PLAYER) :-
         get_lr_diag(BOARD, X, Y, DIAG),
 	find_consecutive(DIAG, 1, PLAYER).
 
+check_win_rl_diag(BOARD, X, Y, PLAYER) :-
+        get_rl_diag(BOARD, X, Y, DIAG),
+	find_consecutive(DIAG, 1, PLAYER).
+
 check_win(BOARD, X, Y, PLAYER) :- check_win_horiz(BOARD, X, Y, PLAYER).
 check_win(BOARD, X, Y, PLAYER) :- check_win_vert(BOARD, X, Y, PLAYER).
 check_win(BOARD, X, Y, PLAYER) :- check_win_lr_diag(BOARD, X, Y, PLAYER).
+check_win(BOARD, X, Y, PLAYER) :- check_win_rl_diag(BOARD, X, Y, PLAYER).
 
 search_row(BOARD, X, Y, [PLAYER | _], PLAYER) :-
 	format("Match for player ~p found at (~p, ~p)~n", [PLAYER, X, Y]),
@@ -123,10 +139,10 @@ has_won(BOARD, PLAYER) :-
 	
 main :-
 	BOARD = [[1, 0, 1, 1, 0, 0, 0],
-		 [0, 0, 0, 0, 0, 0, 0],
-		 [0, 1, 0, 0, 0, 1, 0],
 		 [0, 0, 1, 0, 0, 0, 0],
-		 [0, 0, 0, 1, 0, 0, 0],
+		 [0, 1, 0, 0, 0, 1, 0],
+                 [1, 0, 0, 0, 1, 0, 0],
+		 [0, 0, 0, 0, 0, 0, 0],
 		 [0, 0, 1, 1, 1, 2, 0]],
          (has_won(BOARD, 1), format("Player one wins~n");
          has_won(BOARD, 2), format("Player two wins~n")).
