@@ -3,16 +3,10 @@ import Tkinter as tk
 ROWS = 6
 COLS = 7
 
-class TokenGen(object):
-
-    def __init__(self):
-        self.state = True
-
-    def __iter__(self): return self
-
-    def next(self):
-        self.state = not self.state
-        return "red" if self.state else "yellow"
+def tokengen():
+    while True:
+        yield "yellow"
+        yield "red"
 
 def insert_token(cols, tokgen, colno):
 
@@ -28,13 +22,13 @@ def token_click_closure(cols, tokgen, colno):
 
 def make_gui():
     top = tk.Tk()
-    tokgen = TokenGen()
 
     cols = []
     for colno in range(COLS):
         col = []
 
-        b = tk.Button(top, text=str(colno), command=token_click_closure(cols, tokgen, colno))
+        b = tk.Button(top, text=str(colno),
+                command=token_click_closure(cols, tokengen(), colno))
         b.grid(column=colno, row=0)
 
         for rowno in range(ROWS):
