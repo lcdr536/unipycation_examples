@@ -47,20 +47,32 @@ collect_right(ROW, X, PLAYER, COUNT) :-
 	collect_left(ROW_R, XR, PLAYER, COUNT).
 
 % Count the number of tokens to the left of the same colour
-find_consecutive(BOARD, X, Y, PLAYER) :-
+%find_consecutive(BOARD, X, Y, PLAYER) :-
+find_consecutive(SEQ, X, PLAYER) :-
 	format("Check consecutive~n"),
-	get_row(BOARD, Y, ROW),
-	collect_left(ROW, X, PLAYER, COUNT_LEFT),
-	format("LEFT: ~p~n", [COUNT_LEFT]),
-	collect_right(ROW, X, PLAYER, COUNT_RIGHT),
+        % No need to collect left, will be eventually found
+        %collect_left(SEQ, X, PLAYER, COUNT_LEFT),
+        %format("LEFT: ~p~n", [COUNT_LEFT]),
+	collect_right(SEQ, X, PLAYER, COUNT_RIGHT),
 	format("RIGHT: ~p~n",[COUNT_RIGHT]),
-	COUNT_TOT is COUNT_LEFT + COUNT_RIGHT -1, % start counted twice,
-	format("TOTAL: ~p~n", [COUNT_TOT]),
-	COUNT_TOT >= 4.
+        %COUNT_TOT is COUNT_LEFT + COUNT_RIGHT -1, % start counted twice,
+        %format("TOTAL: ~p~n", [COUNT_TOT]),
+	COUNT_RIGHT >= 4.
+
+check_win_horiz(BOARD, X, Y, PLAYER) :-
+        get_row(BOARD, Y, ROW),
+	find_consecutive(ROW, X, PLAYER).
+
+check_win_vert(BOARD, X, Y, PLAYER) :-
+        get_col(BOARD, X, COL),
+	find_consecutive(COL, Y, PLAYER).
+
+check_win(BOARD, X, Y, PLAYER) :- check_win_horiz(BOARD, X, Y, PLAYER).
+check_win(BOARD, X, Y, PLAYER) :- check_win_vert(BOARD, X, Y, PLAYER).
 
 search_row(BOARD, X, Y, [PLAYER | _], PLAYER) :-
 	format("Match for player ~p found at (~p, ~p)~n", [PLAYER, X, Y]),
-	find_consecutive(BOARD, X, Y, PLAYER).
+        check_win(BOARD, X, Y, PLAYER).
 
 search_row(BOARD, X, Y, [_ | T], PLAYER) :-	% no match head
 	XP is X + 1,
@@ -80,8 +92,8 @@ main :-
 	BOARD = [[1, 1, 1, 1, 0, 0, 0],
 		 [0, 0, 0, 0, 0, 0, 0],
 		 [0, 0, 0, 0, 0, 0, 0],
-		 [0, 0, 0, 1, 0, 0, 0],
+		 [0, 0, 0, 1, 1, 0, 0],
 		 [0, 0, 0, 2, 1, 0, 0],
-		 [0, 1, 1, 1, 1, 2, 0]],
+		 [0, 0, 1, 1, 1, 2, 0]],
 	 (has_won(BOARD, 1), format("Player one wins~n");
 	  has_won(BOARD, 2), format("Player two wins~n")).
