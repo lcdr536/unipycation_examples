@@ -35,9 +35,23 @@ class Connect4(object):
                 col.append(b)
             self.cols.append(col)
 
-    def end(self):
+        self.new_game_button = tk.Button(self.top, text="New Game", command=self.new)
+        self.new_game_button.grid(column=COLS, row=0)
+
+    def end(self, winner_colour):
         for i in self.insert_buttons:
             i["state"] = "disabled"
+        self.new_game_button["background"] = winner_colour
+
+    def new(self):
+        def_bg = self.top.cget('bg')
+        for i in self.insert_buttons: i["state"] = "normal"
+
+        for col in self.cols:
+            for b in col:
+                b["background"] = def_bg
+
+        self.new_game_button["background"] = def_bg
 
     def play(self): self.top.mainloop()
 
@@ -70,7 +84,7 @@ class Connect4(object):
         try:
             winner = it.next()["W"]
             print("%s wins" % winner)
-            self.end()
+            self.end(winner)
         except StopIteration:
             pass # no win yet
 
