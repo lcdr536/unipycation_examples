@@ -4,70 +4,70 @@ import unipycation
 ROWS = 6
 COLS = 7
 
+
+def token_click_closure(c4, colno):
+    return lambda : c4.insert(colno)
+
 def tokengen():
     while True:
         yield "yellow"
         yield "red"
 
-def collect_token_coords(cols, colour):
-    """ makes a prolog list of coords of a given colour """
-    coords = [ "c(%d, %d)" % (x, y)
-            for x in range(COLS) for y in range(ROWS)
-            if cols[x][y]["background"] == colour ]
-    return "[" + ",".join(coords) + "]"
+class Connect4(object):
+    def __init__(self):
+        self.top = tk.Tk()
+        self.tokgen = tokengen()
 
-def check_win(pl_engine, cols):
-    reds = collect_token_coords(cols, "red")
-    yellows = collect_token_coords(cols, "yellow")
+        with open("c42.pl", "r") as f: pdb = f.read()
+        self.pl_engine = unipycation.Engine(pdb)
 
-    q = "has_won(%s, %s, W)." % (reds, yellows)
-    print("<<<" + q + ">>>")
-    it = pl_engine.query(q)
+        self.cols = []
+        for colno in range(COLS):
+            col = []
+            b = tk.Button(self.top, text=str(colno),
+                    command=token_click_closure(self, colno))
+            b.grid(column=colno, row=0)
 
-    try:
-        winner = it.next()["W"]
-        print("%s wins" % winner)
-    except StopIteration:
-        pass # no win yet
+            for rowno in range(ROWS):
+                b = tk.Button(self.top, state=tk.DISABLED)
+                b.grid(column=colno, row=rowno + 1)
+                col.append(b)
+            self.cols.append(col)
 
-def insert_token(pl_engine, cols, tokgen, colno):
+    def play(self): self.top.mainloop()
 
-    for but in reversed(cols[colno]):
-        if but["background"] not in ["red", "yellow"]:
-            but["background"] = tokgen.next()
-            check_win(pl_engine, cols)
-            break
-    else:
-        tokgen.next() # simulates "try again"
+    def _collect_token_coords(self, colour):
+        """ makes a prolog list of coords of a given colour """
+        return [ (x, y) for x in range(COLS) for y in range(ROWS)
+                if self.cols[x][y]["background"] == colour ]
 
-def token_click_closure(pl_engine, cols, tokgen, colno):
-    return lambda : insert_token(pl_engine, cols, tokgen, colno)
+    def insert(self, colno):
+        for but in reversed(self.cols[colno]):
+            if but["background"] not in ["red", "yellow"]:
+                but["background"] = self.tokgen.next()
+                self.check_win()
+                break
+        else:
+            self.tokgen.next() # simulates "try again"
 
-def make_gui():
-    top = tk.Tk()
+    def check_win(self):
 
-    tg = tokengen()
+        reds = self._collect_token_coords("red")
+        reds_p = "[" + ",".join([ "c(%d, %d)" % (x, y)for (x, y) in reds ]) + "]"
 
-    with open("c42.pl", "r") as f: pdb = f.read()
-    print(pdb)
-    pl_engine = unipycation.Engine(pdb)
+        yellows = self._collect_token_coords("yellow")
+        yellows_p = "[" + ",".join([ "c(%d, %d)" % (x, y) for (x, y) in yellows ]) + "]"
 
-    cols = []
-    for colno in range(COLS):
-        col = []
+        q = "has_won(%s, %s, W)." % (reds_p, yellows_p)
+        print("<<<" + q + ">>>")
+        it = self.pl_engine.query(q)
 
-        b = tk.Button(top, text=str(colno),
-                command=token_click_closure(pl_engine, cols, tg, colno))
-        b.grid(column=colno, row=0)
-
-        for rowno in range(ROWS):
-            b = tk.Button(top, state=tk.DISABLED)
-            b.grid(column=colno, row=rowno + 1)
-            col.append(b)
-        cols.append(col)
-
-    return top
+        try:
+            winner = it.next()["W"]
+            print("%s wins" % winner)
+        except StopIteration:
+            pass # no win yet
 
 if __name__ == "__main__":
-    top = make_gui()
-    top.mainloop()
+    g = Connect4()
+    g.play()
