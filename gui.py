@@ -11,12 +11,9 @@ def tokengen():
 
 def collect_token_coords(cols, colour):
     """ makes a prolog list of coords of a given colour """
-    coords = []
-    for x in range(len(cols)):
-        for y in range(len(cols[x])):
-            if cols[x][y]["background"] == colour:
-                coords.append("c(%d, %d)" % (x, y))
-
+    coords = [ "c(%d, %d)" % (x, y)
+            for x in range(COLS) for y in range(ROWS)
+            if cols[x][y]["background"] == colour ]
     return "[" + ",".join(coords) + "]"
 
 def check_win(pl_engine, cols):
