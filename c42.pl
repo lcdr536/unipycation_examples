@@ -1,6 +1,11 @@
 board_width(7).
 board_height(6).
 
+direction(v(1, 0), horizontal).
+direction(v(0, 1), vertical).
+direction(v(1, 1), lrdiagonal).
+direction(v(-1, 1), rldiagnoal).
+
 search_vector(_, _, _, 4) :- !.
 search_vector(COINS, c(X, Y), v(XD, YD), CT) :-
 	board_width(W), -1 < X, X < W,
@@ -11,18 +16,10 @@ search_vector(COINS, c(X, Y), v(XD, YD), CT) :-
 	NEXT_Y is Y + YD,
 	search_vector(COINS, c(NEXT_X, NEXT_Y), v(XD, YD), NEXT_CT), !.
 
-find_consecutive(COINS, c(X, Y)) :-
-	search_vector(COINS, c(X, Y), v(1, 0), 0), % search right
-	format("horizontal win at (~p, ~p)~n", [X, Y]), !.
-find_consecutive(COINS, c(X, Y)) :-
-	search_vector(COINS, c(X, Y), v(0, 1), 0), % search down
-	format("vertical win at (~p, ~p)~n", [X, Y]), !.
-find_consecutive(COINS, c(X, Y)) :-
-	search_vector(COINS, c(X, Y), v(1, 1), 0), % search lr diag
-	format("LR-diagonal win at (~p, ~p)~n", [X, Y]), !.
-find_consecutive(COINS, c(X, Y)) :-
-	search_vector(COINS, c(X, Y), v(-1, 1), 0), % search rl diag
-	format("RL-diagonal win at (~p, ~p)~n", [X, Y]), !.
+find_consecutive(COINS, C) :-
+	direction(VEC, DESCR),
+	search_vector(COINS, C, VEC, 0),
+	format("~p win at ~p~n", [DESCR, C]), !.
 
 has_won(REDS, _, red) :-
 	member(C, REDS),
@@ -35,6 +32,6 @@ has_won(_, YELLOWS, yellow) :-
 % Test case
 % Note the validity of the board is not checked.
 main(WINNER):-
-	REDS = [ c(1, 1), c(4, 2), c(3, 3), c(4, 4) ],
+	REDS = [ c(1, 1), c(2, 2), c(3, 3), c(4, 4) ],
 	YELLOWS = [ c(3, 4), c(4, 4), c(5, 4), c(6, 4)],
 	has_won(REDS, YELLOWS, WINNER).
