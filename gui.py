@@ -9,11 +9,29 @@ def tokengen():
         yield "yellow"
         yield "red"
 
+def collect_token_coords(cols, colour):
+    """ makes a prolog list of coords of a given colour """
+    coords = []
+    for x in range(len(cols)):
+        for y in range(len(cols[x])):
+            if cols[x][y]["background"] == colour:
+                coords.append("c(%d, %d)" % (x, y))
+
+    return "[" + ",".join(coords) + "]"
+
 def check_win(pl_engine, cols):
-    print("pass to prolog")
-    sol = pl_engine.query("has_won([], [], W).").next()["W"] # XXX
-    print(sol)
-    print("done")
+    reds = collect_token_coords(cols, "red")
+    yellows = collect_token_coords(cols, "yellow")
+
+    q = "has_won(%s, %s, W)." % (reds, yellows)
+    print("<<<" + q + ">>>")
+    it = pl_engine.query(q)
+
+    try:
+        winner = it.next()["W"]
+        print("%s wins" % winner)
+    except StopIteration:
+        pass # no win yet
 
 def insert_token(pl_engine, cols, tokgen, colno):
 
