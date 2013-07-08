@@ -6,7 +6,7 @@ direction(v(0, 1), vertical).
 direction(v(1, 1), lrdiagonal).
 direction(v(-1, 1), rldiagnoal).
 
-search_vector(_, _, _, 4) :- !.
+search_vector(_, _, _, 4).
 search_vector(COINS, c(X, Y), v(XD, YD), CT) :-
 	board_width(W), -1 < X, X < W,
 	board_height(H), -1 < Y, Y < H,
@@ -14,12 +14,12 @@ search_vector(COINS, c(X, Y), v(XD, YD), CT) :-
 	NEXT_CT is CT + 1,
 	NEXT_X is X + XD,
 	NEXT_Y is Y + YD,
-	search_vector(COINS, c(NEXT_X, NEXT_Y), v(XD, YD), NEXT_CT), !.
+	search_vector(COINS, c(NEXT_X, NEXT_Y), v(XD, YD), NEXT_CT).
 
 find_consecutive(COINS, C) :-
 	direction(VEC, DESCR),
 	search_vector(COINS, C, VEC, 0),
-	format("~p win at ~p~n", [DESCR, C]), !.
+	format("~p win at ~p~n", [DESCR, C]).
 
 has_won(REDS, _, red) :-
 	member(C, REDS),
