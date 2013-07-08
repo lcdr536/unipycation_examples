@@ -4,7 +4,6 @@ import unipycation
 ROWS = 6
 COLS = 7
 
-
 def token_click_closure(c4, colno):
     return lambda : c4.insert(colno)
 
@@ -22,17 +21,23 @@ class Connect4(object):
         self.pl_engine = unipycation.Engine(pdb)
 
         self.cols = []
+        self.insert_buttons = []
         for colno in range(COLS):
             col = []
             b = tk.Button(self.top, text=str(colno),
                     command=token_click_closure(self, colno))
             b.grid(column=colno, row=0)
+            self.insert_buttons.append(b)
 
             for rowno in range(ROWS):
                 b = tk.Button(self.top, state=tk.DISABLED)
                 b.grid(column=colno, row=rowno + 1)
                 col.append(b)
             self.cols.append(col)
+
+    def end(self):
+        for i in self.insert_buttons:
+            i["state"] = "disabled"
 
     def play(self): self.top.mainloop()
 
@@ -45,12 +50,12 @@ class Connect4(object):
         for but in reversed(self.cols[colno]):
             if but["background"] not in ["red", "yellow"]:
                 but["background"] = self.tokgen.next()
-                self.check_win()
+                self._check_win()
                 break
         else:
             self.tokgen.next() # simulates "try again"
 
-    def check_win(self):
+    def _check_win(self):
 
         reds = self._collect_token_coords("red")
         reds_p = "[" + ",".join([ "c(%d, %d)" % (x, y)for (x, y) in reds ]) + "]"
@@ -65,6 +70,7 @@ class Connect4(object):
         try:
             winner = it.next()["W"]
             print("%s wins" % winner)
+            self.end()
         except StopIteration:
             pass # no win yet
 
