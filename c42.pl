@@ -24,15 +24,13 @@ find_consecutive(COINS, c(X, Y)) :-
 	search_vector(COINS, c(X, Y), v(-1, 1), 0), % search rl diag
 	format("RL-diagonal win at (~p, ~p)~n", [X, Y]), !.
 
-has_won(REDS, _, WHO) :-
+has_won(REDS, _, red) :-
 	member(C, REDS),
-	find_consecutive(REDS, C),
-	WHO = red, !.
+	find_consecutive(REDS, C), !.
 
-has_won(_, YELLOWS, WHO) :-
+has_won(_, YELLOWS, yellow) :-
 	member(C, YELLOWS),
-	find_consecutive(YELLOWS, C),
-	WHO = yellow, !.
+	find_consecutive(YELLOWS, C), !.
 
 % Test case
 % Note the validity of the board is not checked.
