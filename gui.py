@@ -15,6 +15,7 @@ def tokengen():
 class Connect4(object):
     def __init__(self):
         self.top = tk.Tk()
+        self.top.title("Connect 4 GUI (Python)")
         self.tokgen = tokengen()
 
         with open("c42.pl", "r") as f: pdb = f.read()
@@ -40,12 +41,12 @@ class Connect4(object):
 
     def end(self, winner_colour):
         for i in self.insert_buttons:
-            i["state"] = "disabled"
+            i["state"] = tk.DISABLED
         self.new_game_button["background"] = winner_colour
 
     def new(self):
         def_bg = self.top.cget('bg')
-        for i in self.insert_buttons: i["state"] = "normal"
+        for i in self.insert_buttons: i["state"] = tk.NORMAL
 
         for col in self.cols:
             for b in col:
@@ -78,7 +79,7 @@ class Connect4(object):
         yellows_p = "[" + ",".join([ "c(%d, %d)" % (x, y) for (x, y) in yellows ]) + "]"
 
         q = "has_won(%s, %s, W)." % (reds_p, yellows_p)
-        print("<<<" + q + ">>>")
+        print(q)
         it = self.pl_engine.query(q)
 
         try:
