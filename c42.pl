@@ -6,7 +6,6 @@ direction(v(0, 1), vertical).
 direction(v(1, 1), lrdiagonal).
 direction(v(-1, 1), rldiagnoal).
 
-
 member1(E, [E | _]).
 member1(E, [_ | T]) :-
 	member1(E, T).

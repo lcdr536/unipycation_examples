@@ -1,5 +1,5 @@
 import Tkinter as tk
-import unipycation
+import unipycation as upyc
 
 ROWS = 6
 COLS = 7
@@ -19,7 +19,7 @@ class Connect4(object):
         self.tokgen = tokengen()
 
         with open("c42.pl", "r") as f: pdb = f.read()
-        self.pl_engine = unipycation.Engine(pdb)
+        self.pl_engine = upyc.Engine(pdb)
 
         self.cols = []
         self.insert_buttons = []
@@ -72,18 +72,27 @@ class Connect4(object):
 
     def _check_win(self):
 
+        # flatten a list into cons functors
+        def build_prolog_list(elems):
+            if len(elems) == 0: return "[]"
+            (x, y) = elems[0]
+            coord = upyc.Term("c", [x, y])
+            return upyc.Term(".", [ coord, build_prolog_list(elems[1:]) ])
+
         reds = self._collect_token_coords("red")
-        reds_p = "[" + ",".join([ "c(%d, %d)" % (x, y)for (x, y) in reds ]) + "]"
+        red_p_list = build_prolog_list(reds)
+        #reds_p = "[" + ",".join([ "c(%d, %d)" % (x, y)for (x, y) in reds ]) + "]"
 
         yellows = self._collect_token_coords("yellow")
-        yellows_p = "[" + ",".join([ "c(%d, %d)" % (x, y) for (x, y) in yellows ]) + "]"
+        yellow_p_list = build_prolog_list(yellows)
+        #yellows_p = "[" + ",".join([ "c(%d, %d)" % (x, y) for (x, y) in yellows ]) + "]"
 
-        q = "has_won(%s, %s, W)." % (reds_p, yellows_p)
-        print(q)
-        it = self.pl_engine.query(q)
+        W = upyc.Var()
+        qry = upyc.Term("has_won", [red_p_list, yellow_p_list, W])
+        print(qry)
 
         try:
-            winner = it.next()["W"]
+            winner = self.pl_engine.query_single(qry, [W])[W]
             print("%s wins" % winner)
             self.end(winner)
         except StopIteration:
