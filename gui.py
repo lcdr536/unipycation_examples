@@ -73,19 +73,15 @@ class Connect4(object):
     def _check_win(self):
 
         # flatten a list into cons functors
+        # XXX make unipycation interface better to rid of this wart.
         def build_prolog_list(elems):
             if len(elems) == 0: return "[]"
             (x, y) = elems[0]
             coord = upyc.Term("c", [x, y])
             return upyc.Term(".", [ coord, build_prolog_list(elems[1:]) ])
 
-        reds = self._collect_token_coords("red")
-        red_p_list = build_prolog_list(reds)
-        #reds_p = "[" + ",".join([ "c(%d, %d)" % (x, y)for (x, y) in reds ]) + "]"
-
-        yellows = self._collect_token_coords("yellow")
-        yellow_p_list = build_prolog_list(yellows)
-        #yellows_p = "[" + ",".join([ "c(%d, %d)" % (x, y) for (x, y) in yellows ]) + "]"
+        red_p_list = build_prolog_list(self._collect_token_coords("red"))
+        yellow_p_list = build_prolog_list(self._collect_token_coords("yellow"))
 
         W = upyc.Var()
         qry = upyc.Term("has_won", [red_p_list, yellow_p_list, W])
