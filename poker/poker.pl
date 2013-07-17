@@ -28,13 +28,23 @@ consecutive_values(CARDS, C1, N_REQ, MATCH) :-
     N_REQ_NEXT is N_REQ - 1,
     consecutive_values(CARDS2, C2, N_REQ_NEXT, NEXT_MATCH).
 
+same_suit(CARDS) :-
+    select(card(_, SUIT), CARDS, CARDS_REMAIN),
+    all_suit(CARDS_REMAIN, SUIT), !.
+
+all_suit([], _).
+all_suit(CARDS, SUIT) :-
+	select(card(_, SUIT), CARDS, CARDS2),
+	all_suit(CARDS2, SUIT).
+
 % ---[ Begin Winning Hands ]------------------------------------------
 
 hand(CARDS, four_of_a_kind, MATCH) :-
     of_a_kind(CARDS, 4, MATCH).
 
 hand(CARDS, straight_flush, MATCH) :-
-    consecutive_values(CARDS, 5, MATCH).
+    consecutive_values(CARDS, 5, MATCH),
+    same_suit(MATCH).
 
 % ---[ Just for testing ]---------------------------------------------
 
