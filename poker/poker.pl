@@ -19,9 +19,8 @@ consecutive_values(CARDS, N_REQ, MATCH) :-
     select(CARD, CARDS, CARDS2),
     consecutive_values(CARDS2, CARD, N_REQ, MATCH).
 
-consecutive_values(_, _, 0, []).
+consecutive_values(_, C1, 1, [C1]).
 consecutive_values(CARDS, C1, N_REQ, MATCH) :-
-    N_REQ > 0,
     select(C2, CARDS, CARDS2),
     next_in_value(C1, C2),
     MATCH = [ C1 | NEXT_MATCH],
@@ -46,19 +45,20 @@ hand(CARDS, straight_flush, MATCH) :-
     consecutive_values(CARDS, 5, MATCH),
     same_suit(MATCH).
 
+hand(CARDS, royal_flush, MATCH) :-
+    hand(CARDS, straight_flush, MATCH),
+    MATCH = [ H | _ ],
+    H = card(10, _).
+
 % ---[ Just for testing ]---------------------------------------------
 
 main(HANDNAME, MATCH) :-
     CARDS = [
-          card(4, hearts),
-          card(4, clubs),
-          card(4, spades),
-          card(5, spades),
-          card(6, spades),
-          card(7, spades),
-          card(8, spades),
-          card(9, spades),
-          card(10, spades),
-          card(4, diamonds)
+          card(9, diamonds),
+          card(10, diamonds),
+          card(j, diamonds),
+          card(q, diamonds),
+          card(k, diamonds),
+	  card(a, diamonds)
       ],
     hand(CARDS, HANDNAME, MATCH).
