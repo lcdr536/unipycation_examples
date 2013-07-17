@@ -1,5 +1,6 @@
 import Tkinter as tk
-import unipycation as upyc
+#import unipycation as upyc
+import uni
 
 ROWS = 6
 COLS = 7
@@ -19,7 +20,7 @@ class Connect4(object):
         self.tokgen = tokengen()
 
         with open("c42.pl", "r") as f: pdb = f.read()
-        self.pl_engine = upyc.Engine(pdb)
+        self.pl_engine = uni.Engine(pdb)
 
         self.cols = []
         self.insert_buttons = []
@@ -83,12 +84,13 @@ class Connect4(object):
         red_p_list = build_prolog_list(self._collect_token_coords("red"))
         yellow_p_list = build_prolog_list(self._collect_token_coords("yellow"))
 
-        W = upyc.Var()
-        qry = upyc.Term("has_won", [red_p_list, yellow_p_list, W])
-        print(qry)
+        #W = upyc.Var()
+        #qry = upyc.Term("has_won", [red_p_list, yellow_p_list, W])
+        #print(qry)
 
         try:
-            winner = self.pl_engine.query_single(qry, [W])[W]
+            #winner = self.pl_engine.query_single(qry, [W])[W]
+            (winner, ) = self.pl_engine.db.has_won(red_p_list, yellow_p_list, None)
             print("%s wins" % winner)
             self.end(winner)
         except StopIteration:
