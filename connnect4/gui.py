@@ -1,5 +1,4 @@
 import Tkinter as tk
-#import unipycation as upyc
 import uni
 
 ROWS = 6
@@ -40,7 +39,7 @@ class Connect4(object):
         self.new_game_button = tk.Button(self.top, text="New Game", command=self.new)
         self.new_game_button.grid(column=COLS, row=0)
 
-    def end(self, winner_colour):
+    def _end(self, winner_colour):
         for i in self.insert_buttons:
             i["state"] = tk.DISABLED
         self.new_game_button["background"] = winner_colour
@@ -78,23 +77,17 @@ class Connect4(object):
         def build_prolog_list(elems):
             if len(elems) == 0: return "[]"
             (x, y) = elems[0]
-            coord = upyc.Term("c", [x, y])
-            return upyc.Term(".", [ coord, build_prolog_list(elems[1:]) ])
+            coord = uni.Term("c", [x, y])
+            return uni.Term(".", [ coord, build_prolog_list(elems[1:]) ])
 
         red_p_list = build_prolog_list(self._collect_token_coords("red"))
         yellow_p_list = build_prolog_list(self._collect_token_coords("yellow"))
 
-        #W = upyc.Var()
-        #qry = upyc.Term("has_won", [red_p_list, yellow_p_list, W])
-        #print(qry)
-
-        try:
-            #winner = self.pl_engine.query_single(qry, [W])[W]
-            (winner, ) = self.pl_engine.db.has_won(red_p_list, yellow_p_list, None)
+        res = self.pl_engine.db.has_won(red_p_list, yellow_p_list, None)
+        if res is not None:
+            (winner, ) = res
             print("%s wins" % winner)
-            self.end(winner)
-        except StopIteration:
-            pass # no win yet
+            self._end(winner)
 
 if __name__ == "__main__":
     g = Connect4()
