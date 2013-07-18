@@ -76,6 +76,12 @@ hand(CARDS, straight, MATCH) :-
 hand(CARDS, three_of_a_kind, MATCH) :-
     of_a_kind(CARDS, 3, MATCH).
 
+hand(CARDS, two_pair, MATCH) :-
+	of_a_kind(CARDS, 2, MATCH1),
+	subtract(CARDS, MATCH1, REMAIN_CARDS),
+	of_a_kind(REMAIN_CARDS, 2, MATCH2),
+	append(MATCH2, MATCH1, MATCH).
+
 % ---[ Just for testing ]---------------------------------------------
 
 main(HANDNAME, MATCH) :-
@@ -87,6 +93,7 @@ main(HANDNAME, MATCH) :-
           card(q, hearts),
           card(q, clubs),
           card(k, diamonds),
+          card(k, hearts),
           card(a, diamonds)
       ],
     hand(CARDS, HANDNAME, MATCH).
