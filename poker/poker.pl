@@ -1,3 +1,5 @@
+module(poker, [main/2]).
+
 value_order([2, 3, 4, 5, 6, 7, 8, 9, 10, j, q, k, a ]).
 
 next_in_value(card(VAL1, _), card(VAL2, _)) :-
@@ -100,4 +102,5 @@ main(HANDNAME, MATCH) :-
           card(q, diamonds),
           card(3, diamonds)
       ],
-    hand(CARDS, HANDNAME, MATCH).
+    hand(CARDS, HANDNAME, MATCH_UNSORT),
+    sort(MATCH_UNSORT, MATCH).
