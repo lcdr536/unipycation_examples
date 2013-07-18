@@ -6,16 +6,18 @@ next_in_value(card(VAL1, _), card(VAL2, _)) :-
 	value_order(L),
 	nextto(VAL1, VAL2, L).
 
-of_a_kind(CARDS, N_REQ, MATCH) :-
-	member(card(VAL, _), CARDS),
-	of_a_kind(CARDS, N_REQ, VAL, MATCH).
+
+pick(H, [H | T], T).
+pick(H, [_ | T], T2) :- pick(H, T, T2).
+
+of_a_kind(Cards, NReq, Result) :-
+        of_a_kind(Cards, NReq, _, Result).
 
 of_a_kind(_, 0, _, []).
-of_a_kind(CARDS, N_REQ, VAL, MATCH) :-
-	select(card(VAL, ST), CARDS, CARDS2),
-	N_REQ_NEXT is N_REQ - 1,
-	MATCH = [ card(VAL, ST) | NEXT_MATCH ],
-	of_a_kind(CARDS2, N_REQ_NEXT, VAL, NEXT_MATCH).
+of_a_kind(Cards, NReq, Val, [card(Val, St) | Rest]) :-
+        NReq > 0, NReqNext is NReq - 1,
+        pick(card(Val, St), Cards, Cards2),
+        of_a_kind(Cards2, NReqNext, Val, Rest).
 
 consecutive_values(CARDS, N_REQ, MATCH) :-
 	select(CARD, CARDS, CARDS2),
