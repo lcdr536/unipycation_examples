@@ -5,7 +5,7 @@ ROWS = 6
 COLS = 7
 
 def token_click_closure(c4, colno):
-    return lambda : c4.insert(colno)
+    return lambda : c4._insert(colno)
 
 def tokengen():
     while True:
@@ -36,7 +36,7 @@ class Connect4(object):
                 col.append(b)
             self.cols.append(col)
 
-        self.new_game_button = tk.Button(self.top, text="New Game", command=self.new)
+        self.new_game_button = tk.Button(self.top, text="New Game", command=self._new)
         self.new_game_button.grid(column=COLS, row=0)
 
     def _end(self, winner_colour):
@@ -44,7 +44,7 @@ class Connect4(object):
             i["state"] = tk.DISABLED
         self.new_game_button["background"] = winner_colour
 
-    def new(self):
+    def _new(self):
         def_bg = self.top.cget('bg')
         for i in self.insert_buttons: i["state"] = tk.NORMAL
 
@@ -61,7 +61,7 @@ class Connect4(object):
         return [ (x, y) for x in range(COLS) for y in range(ROWS)
                 if self.cols[x][y]["background"] == colour ]
 
-    def insert(self, colno):
+    def _insert(self, colno):
         for but in reversed(self.cols[colno]):
             if but["background"] not in ["red", "yellow"]:
                 but["background"] = self.tokgen.next()
