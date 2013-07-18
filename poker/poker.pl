@@ -31,13 +31,12 @@ consecutive_values(Cards, C1, Nreq, [ C1 | Match]) :-
 	consecutive_values(Cards2, C2, NReqNext, Match).
 
 same_suit(Cards, NReq, Match) :-
-	same_suit(Cards, NReq, _, Match), !.
+	same_suit(Cards, NReq, _, Match).
 
 same_suit(_, 0, _, []).
-same_suit(Cards, NReq, Suit, Match) :-
-	select(card(Val, Suit), Cards, CardsRemain),
-	NReqNext is NReq - 1,
-	Match = [ card(Val, Suit) | NextMatch ],
+same_suit(Cards, NReq, Suit, [ card(Val, Suit) | NextMatch ]) :-
+        NReq > 1, NReqNext is NReq - 1,
+	pick(card(Val, Suit), Cards, CardsRemain),
 	same_suit(CardsRemain, NReqNext, Suit, NextMatch).
 
 select_n(_, 0, []).
