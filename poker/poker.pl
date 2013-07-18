@@ -7,34 +7,34 @@ no_permutations(CARDS) :-
 value_order([2, 3, 4, 5, 6, 7, 8, 9, 10, j, q, k, a ]).
 
 next_in_value(card(VAL1, _), card(VAL2, _)) :-
-    value_order(L),
-    nextto(VAL1, VAL2, L).
+	value_order(L),
+	nextto(VAL1, VAL2, L).
 
 of_a_kind(CARDS, N_REQ, MATCH) :-
-    member(card(VAL, _), CARDS),
-    of_a_kind(CARDS, N_REQ, VAL, MATCH), !.
+	member(card(VAL, _), CARDS),
+	of_a_kind(CARDS, N_REQ, VAL, MATCH), !.
 
 of_a_kind(_, 0, _, []).
 of_a_kind(CARDS, N_REQ, VAL, MATCH) :-
-    select(card(VAL, ST), CARDS, CARDS2),
-    N_REQ_NEXT is N_REQ - 1,
-    MATCH = [ card(VAL, ST) | NEXT_MATCH ],
-    of_a_kind(CARDS2, N_REQ_NEXT, VAL, NEXT_MATCH).
+	select(card(VAL, ST), CARDS, CARDS2),
+	N_REQ_NEXT is N_REQ - 1,
+	MATCH = [ card(VAL, ST) | NEXT_MATCH ],
+	of_a_kind(CARDS2, N_REQ_NEXT, VAL, NEXT_MATCH).
 
 consecutive_values(CARDS, N_REQ, MATCH) :-
-    select(CARD, CARDS, CARDS2),
-    consecutive_values(CARDS2, CARD, N_REQ, MATCH).
+	select(CARD, CARDS, CARDS2),
+	consecutive_values(CARDS2, CARD, N_REQ, MATCH).
 
 consecutive_values(_, C1, 1, [C1]).
 consecutive_values(CARDS, C1, N_REQ, MATCH) :-
-    select(C2, CARDS, CARDS2),
-    next_in_value(C1, C2),
-    MATCH = [ C1 | NEXT_MATCH],
-    N_REQ_NEXT is N_REQ - 1,
-    consecutive_values(CARDS2, C2, N_REQ_NEXT, NEXT_MATCH).
+	select(C2, CARDS, CARDS2),
+	next_in_value(C1, C2),
+	MATCH = [ C1 | NEXT_MATCH],
+	N_REQ_NEXT is N_REQ - 1,
+	consecutive_values(CARDS2, C2, N_REQ_NEXT, NEXT_MATCH).
 
 same_suit(CARDS, N_REQ, MATCH) :-
-    same_suit(CARDS, N_REQ, _, MATCH), !.
+	same_suit(CARDS, N_REQ, _, MATCH), !.
 
 same_suit(_, 0, _, []).
 same_suit(CARDS, N_REQ, SUIT, MATCH) :-
@@ -53,19 +53,19 @@ select_n(CARDS, N, SELECTION) :-
 % ---[ Begin Winning Hands ]------------------------------------------
 
 hand(CARDS, four_of_a_kind, MATCH) :-
-    of_a_kind(CARDS, 4, MATCH).
+	of_a_kind(CARDS, 4, MATCH).
 
 hand(CARDS, straight_flush, MATCH) :-
-    consecutive_values(CARDS, 5, MATCH),
-    same_suit(MATCH, 5, _),
-    MATCH = [ H | _ ],
-    H \= card(10, _).
+	consecutive_values(CARDS, 5, MATCH),
+	same_suit(MATCH, 5, _),
+	MATCH = [ H | _ ],
+	H \= card(10, _).
 
 hand(CARDS, royal_flush, MATCH) :-
-    consecutive_values(CARDS, 5, MATCH),
-    same_suit(MATCH, 5, _),
-    MATCH = [ H | _ ],
-    H = card(10, _).
+	consecutive_values(CARDS, 5, MATCH),
+	same_suit(MATCH, 5, _),
+	MATCH = [ H | _ ],
+	H = card(10, _).
 
 hand(CARDS, full_house, MATCH) :-
 	of_a_kind(CARDS, 3, MATCH_THREE),
@@ -83,7 +83,7 @@ hand(CARDS, straight, MATCH) :-
 	consecutive_values(CARDS, 5, MATCH).
 
 hand(CARDS, three_of_a_kind, MATCH) :-
-    of_a_kind(CARDS, 3, MATCH).
+	of_a_kind(CARDS, 3, MATCH).
 
 hand(CARDS, two_pair, MATCH) :-
 	of_a_kind(CARDS, 2, MATCH1),
@@ -92,7 +92,7 @@ hand(CARDS, two_pair, MATCH) :-
 	append(MATCH2, MATCH1, MATCH).
 
 hand(CARDS, one_pair, MATCH) :-
-    of_a_kind(CARDS, 2, MATCH).
+	of_a_kind(CARDS, 2, MATCH).
 
 hand(CARDS, high_card, MATCH) :-
 	select(C, CARDS, _),
