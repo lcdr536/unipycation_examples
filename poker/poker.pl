@@ -28,10 +28,7 @@ consecutive_values(CARDS, C1, N_REQ, MATCH) :-
     consecutive_values(CARDS2, C2, N_REQ_NEXT, NEXT_MATCH).
 
 same_suit(CARDS, N_REQ, MATCH) :-
-    select(card(VAL, SUIT), CARDS, CARDS_REMAIN),
-    N_REQ_NEXT is N_REQ - 1,
-    MATCH = [ card(VAL, SUIT) | NEXT_MATCH ],
-    same_suit(CARDS_REMAIN, N_REQ_NEXT, SUIT, NEXT_MATCH), !.
+    same_suit(CARDS, N_REQ, _, MATCH), !.
 
 same_suit(_, 0, _, []).
 same_suit(CARDS, N_REQ, SUIT, MATCH) :-
