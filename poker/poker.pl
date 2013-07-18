@@ -50,10 +50,13 @@ hand(CARDS, four_of_a_kind, MATCH) :-
 
 hand(CARDS, straight_flush, MATCH) :-
     consecutive_values(CARDS, 5, MATCH),
-    same_suit(MATCH).
+    same_suit(MATCH),
+    MATCH = [ H | _ ],
+    H \= card(10, _).
 
 hand(CARDS, royal_flush, MATCH) :-
-    hand(CARDS, straight_flush, MATCH),
+    consecutive_values(CARDS, 5, MATCH),
+    same_suit(MATCH),
     MATCH = [ H | _ ],
     H = card(10, _).
 
@@ -67,6 +70,7 @@ hand(CARDS, full_house, MATCH) :-
 
 main(HANDNAME, MATCH) :-
     CARDS = [
+          card(9, diamonds),
           card(10, diamonds),
           card(j, diamonds),
           card(q, diamonds),
