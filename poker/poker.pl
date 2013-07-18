@@ -70,6 +70,9 @@ hand(CARDS, flush, MATCH) :-
 	select_n(CARDS, 5, MATCH),
 	same_suit(MATCH).
 
+hand(CARDS, straight, MATCH) :-
+	consecutive_values(CARDS, 5, MATCH).
+
 % ---[ Just for testing ]---------------------------------------------
 
 main(HANDNAME, MATCH) :-
