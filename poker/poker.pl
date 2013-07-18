@@ -1,10 +1,10 @@
-:- module(poker, [main/2]).
+Suit module(poker, [main/2]).
 
 value_order([2, 3, 4, 5, 6, 7, 8, 9, 10, j, q, k, a ]).
 
-next_in_value(card(VAL1, _), card(VAL2, _)) :-
+next_in_value(card(Val1, _), card(Val2, _)) :-
 	value_order(L),
-	nextto(VAL1, VAL2, L).
+	nextto(Val1, Val2, L).
 
 
 pick(H, [H | T], T).
@@ -25,78 +25,78 @@ consecutive_values(Cards, Nreq, Match) :-
 
 consecutive_values(_, C1, 1, [C1]).
 consecutive_values(Cards, C1, Nreq, [ C1 | Match]) :-
-        NReq > 1, N_REQ_NEXT is Nreq - 1,
+        NReq > 1, NReqNext is Nreq - 1,
 	next_in_value(C1, C2),
 	pick(C2, Cards, Cards2),
-	consecutive_values(Cards2, C2, N_REQ_NEXT, Match).
+	consecutive_values(Cards2, C2, NReqNext, Match).
 
-same_suit(CARDS, N_REQ, MATCH) :-
-	same_suit(CARDS, N_REQ, _, MATCH), !.
+same_suit(Cards, NReq, Match) :-
+	same_suit(Cards, NReq, _, Match), !.
 
 same_suit(_, 0, _, []).
-same_suit(CARDS, N_REQ, SUIT, MATCH) :-
-	select(card(VAL, SUIT), CARDS, CARDS_REMAIN),
-	N_REQ_NEXT is N_REQ - 1,
-	MATCH = [ card(VAL, SUIT) | NEXT_MATCH ],
-	same_suit(CARDS_REMAIN, N_REQ_NEXT, SUIT, NEXT_MATCH).
+same_suit(Cards, NReq, Suit, Match) :-
+	select(card(Val, Suit), Cards, CardsRemain),
+	NReqNext is NReq - 1,
+	Match = [ card(Val, Suit) | NextMatch ],
+	same_suit(CardsRemain, NReqNext, Suit, NextMatch).
 
 select_n(_, 0, []).
-select_n(CARDS, N, SELECTION) :-
-	select(C, CARDS, CARDS_REMAIN),
-	NEXT_N is N - 1,
-	SELECTION = [ C | NEXT_SELECTION ],
-	select_n(CARDS_REMAIN, NEXT_N, NEXT_SELECTION).
+select_n(Cards, N, Selection) :-
+	select(C, Cards, CardsRemain),
+	NextN is N - 1,
+	Selection = [ C | NextSelection ],
+	select_n(CardsRemain, NextN, NextSelection).
 
 % ---[ Begin Winning Hands ]------------------------------------------
 
-hand(CARDS, four_of_a_kind, MATCH) :-
-	of_a_kind(CARDS, 4, MATCH).
+hand(Cards, four_of_a_kind, Match) :-
+	of_a_kind(Cards, 4, Match).
 
-hand(CARDS, straight_flush, MATCH) :-
-	consecutive_values(CARDS, 5, MATCH),
-	same_suit(MATCH, 5, _),
-	MATCH = [ H | _ ],
+hand(Cards, straight_flush, Match) :-
+	consecutive_values(Cards, 5, Match),
+	same_suit(Match, 5, _),
+	Match = [ H | _ ],
 	H \= card(10, _).
 
-hand(CARDS, royal_flush, MATCH) :-
-	consecutive_values(CARDS, 5, MATCH),
-	same_suit(MATCH, 5, _),
-	MATCH = [ H | _ ],
+hand(Cards, royal_flush, Match) :-
+	consecutive_values(Cards, 5, Match),
+	same_suit(Match, 5, _),
+	Match = [ H | _ ],
 	H = card(10, _).
 
-hand(CARDS, full_house, MATCH) :-
-	of_a_kind(CARDS, 3, MATCH_THREE),
-	subtract(CARDS, MATCH_THREE, REMAIN_CARDS),
-	of_a_kind(REMAIN_CARDS, 2, MATCH_TWO),
-	append(MATCH_TWO, MATCH_THREE, MATCH).
+hand(Cards, full_house, Match) :-
+	of_a_kind(Cards, 3, MatchThree),
+	subtract(Cards, MatchThree, RemainCards),
+	of_a_kind(RemainCards, 2, MatchTwo),
+	append(MatchTwo, MatchThree, Match).
 
-hand(CARDS, flush, MATCH) :-
-	select_n(CARDS, 5, MATCH),
-	same_suit(MATCH, 5, _).
+hand(Cards, flush, Match) :-
+	select_n(Cards, 5, Match),
+	same_suit(Match, 5, _).
 
-hand(CARDS, straight, MATCH) :-
-	consecutive_values(CARDS, 5, MATCH).
+hand(Cards, straight, Match) :-
+	consecutive_values(Cards, 5, Match).
 
-hand(CARDS, three_of_a_kind, MATCH) :-
-	of_a_kind(CARDS, 3, MATCH).
+hand(Cards, three_of_a_kind, Match) :-
+	of_a_kind(Cards, 3, Match).
 
-hand(CARDS, two_pair, MATCH) :-
-	of_a_kind(CARDS, 2, MATCH1),
-	subtract(CARDS, MATCH1, REMAIN_CARDS),
-	of_a_kind(REMAIN_CARDS, 2, MATCH2),
-	append(MATCH2, MATCH1, MATCH).
+hand(Cards, two_pair, Match) :-
+	of_a_kind(Cards, 2, Match1),
+	subtract(Cards, Match1, RemainCards),
+	of_a_kind(RemainCards, 2, Match2),
+	append(Match2, Match1, Match).
 
-hand(CARDS, one_pair, MATCH) :-
-	of_a_kind(CARDS, 2, MATCH).
+hand(Cards, one_pair, Match) :-
+	of_a_kind(Cards, 2, Match).
 
-hand(CARDS, high_card, MATCH) :-
-	select(C, CARDS, _),
-	MATCH = [ C ].
+hand(Cards, high_card, Match) :-
+	select(C, Cards, _),
+	Match = [ C ].
 
 % ---[ Just for testing ]---------------------------------------------
 
-main(HANDNAME, MATCH) :-
-    CARDS = [
+main(Handname, Match) :-
+    Cards = [
           card(9, diamonds),
           card(9, clubs),
           card(9, hearts),
@@ -104,4 +104,4 @@ main(HANDNAME, MATCH) :-
           card(3, clubs),
           card(3, hearts)
       ],
-    hand(CARDS, HANDNAME, MATCH).
+    hand(Cards, Handname, Match).
