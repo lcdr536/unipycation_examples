@@ -8,7 +8,7 @@ next_in_value(card(VAL1, _), card(VAL2, _)) :-
 
 of_a_kind(CARDS, N_REQ, MATCH) :-
 	member(card(VAL, _), CARDS),
-	of_a_kind(CARDS, N_REQ, VAL, MATCH), !.
+	of_a_kind(CARDS, N_REQ, VAL, MATCH).
 
 of_a_kind(_, 0, _, []).
 of_a_kind(CARDS, N_REQ, VAL, MATCH) :-
@@ -103,5 +103,4 @@ main(HANDNAME, MATCH) :-
           card(3, clubs),
           card(3, hearts)
       ],
-    sort(CARDS, CARDS_SORTED),
-    hand(CARDS_SORTED, HANDNAME, MATCH).
+    hand(CARDS, HANDNAME, MATCH).
