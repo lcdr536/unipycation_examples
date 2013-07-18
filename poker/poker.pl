@@ -13,7 +13,7 @@ of_a_kind(CARDS, N_REQ, VAL, MATCH) :-
     select(card(VAL, ST), CARDS, CARDS2),
     N_REQ_NEXT is N_REQ - 1,
     MATCH = [ card(VAL, ST) | NEXT_MATCH ],
-    of_a_kind(CARDS2, N_REQ_NEXT, VAL, NEXT_MATCH), !.
+    of_a_kind(CARDS2, N_REQ_NEXT, VAL, NEXT_MATCH).
 
 consecutive_values(CARDS, N_REQ, MATCH) :-
     select(CARD, CARDS, CARDS2),
@@ -36,6 +36,13 @@ all_suit(CARDS, SUIT) :-
 	select(card(_, SUIT), CARDS, CARDS2),
 	all_suit(CARDS2, SUIT).
 
+select_n(_, 0, []).
+select_n(CARDS, N, SELECTION) :-
+	select(C, CARDS, CARDS_REMAIN),
+	NEXT_N is N - 1,
+	SELECTION = [ C | NEXT_SELECTION ],
+	select_n(CARDS_REMAIN, NEXT_N, NEXT_SELECTION).
+
 % ---[ Begin Winning Hands ]------------------------------------------
 
 hand(CARDS, four_of_a_kind, MATCH) :-
@@ -50,15 +57,20 @@ hand(CARDS, royal_flush, MATCH) :-
     MATCH = [ H | _ ],
     H = card(10, _).
 
+hand(CARDS, full_house, MATCH) :-
+	of_a_kind(CARDS, 3, MATCH_THREE),
+	subtract(CARDS, MATCH_THREE, REMAIN_CARDS),
+	of_a_kind(REMAIN_CARDS, 2, MATCH_TWO),
+	append(MATCH_TWO, MATCH_THREE, MATCH).
+
 % ---[ Just for testing ]---------------------------------------------
 
 main(HANDNAME, MATCH) :-
     CARDS = [
-          card(9, diamonds),
           card(10, diamonds),
           card(j, diamonds),
           card(q, diamonds),
           card(k, diamonds),
-	  card(a, diamonds)
+          card(a, diamonds)
       ],
     hand(CARDS, HANDNAME, MATCH).
