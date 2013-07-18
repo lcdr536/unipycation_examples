@@ -51,17 +51,9 @@ select_n(Cards, N, Selection) :-
 hand(Cards, four_of_a_kind, Match) :-
 	of_a_kind(Cards, 4, Match).
 
-hand(Cards, straight_flush, Match) :-
-	consecutive_values(Cards, 5, Match),
-	same_suit(Match, 5, _),
-	Match = [ H | _ ],
-	H \= card(10, _).
-
-hand(Cards, royal_flush, Match) :-
-	consecutive_values(Cards, 5, Match),
-	same_suit(Match, 5, _),
-	Match = [ H | _ ],
-	H = card(10, _).
+hand(Cards, Flush, Match) :-
+        same_suit(Cards, 5, Match),
+        select_flush_kind(Match, Flush).
 
 hand(Cards, full_house, Match) :-
 	of_a_kind(Cards, 3, MatchThree),
@@ -91,6 +83,16 @@ hand(Cards, one_pair, Match) :-
 hand(Cards, high_card, Match) :-
 	select(C, Cards, _),
 	Match = [ C ].
+
+% ugly :-(
+select_flush_kind(Cards, Flush) :-
+    consecutive_values(Cards, 5, Match) -> (
+        Match = [H | _],
+        H = card(10, _) -> Flush = royal_flush; Flush = straight_flush
+    ) ; (
+        Flush = flush
+    ).
+
 
 % ---[ Just for testing ]---------------------------------------------
 
