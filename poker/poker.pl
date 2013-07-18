@@ -82,6 +82,13 @@ hand(CARDS, two_pair, MATCH) :-
 	of_a_kind(REMAIN_CARDS, 2, MATCH2),
 	append(MATCH2, MATCH1, MATCH).
 
+hand(CARDS, one_pair, MATCH) :-
+    of_a_kind(CARDS, 2, MATCH).
+
+hand(CARDS, high_card, MATCH) :-
+	select(C, CARDS, _),
+	MATCH = [ C ].
+
 % ---[ Just for testing ]---------------------------------------------
 
 main(HANDNAME, MATCH) :-
