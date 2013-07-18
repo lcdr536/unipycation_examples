@@ -66,6 +66,10 @@ hand(CARDS, full_house, MATCH) :-
 	of_a_kind(REMAIN_CARDS, 2, MATCH_TWO),
 	append(MATCH_TWO, MATCH_THREE, MATCH).
 
+hand(CARDS, flush, MATCH) :-
+	select_n(CARDS, 5, MATCH),
+	same_suit(MATCH).
+
 % ---[ Just for testing ]---------------------------------------------
 
 main(HANDNAME, MATCH) :-
