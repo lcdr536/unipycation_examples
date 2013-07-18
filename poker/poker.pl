@@ -19,17 +19,16 @@ of_a_kind(Cards, NReq, Val, [card(Val, St) | Rest]) :-
         pick(card(Val, St), Cards, Cards2),
         of_a_kind(Cards2, NReqNext, Val, Rest).
 
-consecutive_values(CARDS, N_REQ, MATCH) :-
-	select(CARD, CARDS, CARDS2),
-	consecutive_values(CARDS2, CARD, N_REQ, MATCH).
+consecutive_values(Cards, Nreq, Match) :-
+	pick(Card, Cards, Cards2),
+	consecutive_values(Cards2, Card, Nreq, Match).
 
 consecutive_values(_, C1, 1, [C1]).
-consecutive_values(CARDS, C1, N_REQ, MATCH) :-
-	select(C2, CARDS, CARDS2),
+consecutive_values(Cards, C1, Nreq, [ C1 | Match]) :-
+        NReq > 1, N_REQ_NEXT is Nreq - 1,
 	next_in_value(C1, C2),
-	MATCH = [ C1 | NEXT_MATCH],
-	N_REQ_NEXT is N_REQ - 1,
-	consecutive_values(CARDS2, C2, N_REQ_NEXT, NEXT_MATCH).
+	pick(C2, Cards, Cards2),
+	consecutive_values(Cards2, C2, N_REQ_NEXT, Match).
 
 same_suit(CARDS, N_REQ, MATCH) :-
 	same_suit(CARDS, N_REQ, _, MATCH), !.
