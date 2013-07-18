@@ -1,4 +1,4 @@
-Suit module(poker, [main/2]).
+:- module(poker, [main/2]).
 
 value_order([2, 3, 4, 5, 6, 7, 8, 9, 10, j, q, k, a ]).
 
@@ -19,13 +19,13 @@ of_a_kind(Cards, NReq, Val, [card(Val, St) | Rest]) :-
         pick(card(Val, St), Cards, Cards2),
         of_a_kind(Cards2, NReqNext, Val, Rest).
 
-consecutive_values(Cards, Nreq, Match) :-
+consecutive_values(Cards, NReq, Match) :-
 	pick(Card, Cards, Cards2),
-	consecutive_values(Cards2, Card, Nreq, Match).
+	consecutive_values(Cards2, Card, NReq, Match).
 
 consecutive_values(_, C1, 1, [C1]).
-consecutive_values(Cards, C1, Nreq, [ C1 | Match]) :-
-        NReq > 1, NReqNext is Nreq - 1,
+consecutive_values(Cards, C1, NReq, [ C1 | Match]) :-
+        NReq > 1, NReqNext is NReq - 1,
 	next_in_value(C1, C2),
 	pick(C2, Cards, Cards2),
 	consecutive_values(Cards2, C2, NReqNext, Match).
