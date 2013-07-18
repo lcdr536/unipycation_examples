@@ -1,9 +1,5 @@
 :- module(poker, [main/2]).
 
-no_permutations(CARDS) :-
-	sort(CARDS, CARDS_SORTED),
-	CARDS = CARDS_SORTED.
-
 value_order([2, 3, 4, 5, 6, 7, 8, 9, 10, j, q, k, a ]).
 
 next_in_value(card(VAL1, _), card(VAL2, _)) :-
@@ -72,12 +68,10 @@ hand(CARDS, full_house, MATCH) :-
 	subtract(CARDS, MATCH_THREE, REMAIN_CARDS),
 	of_a_kind(REMAIN_CARDS, 2, MATCH_TWO),
 	append(MATCH_TWO, MATCH_THREE, MATCH).
-	%no_permutations(MATCH).
 
 hand(CARDS, flush, MATCH) :-
 	select_n(CARDS, 5, MATCH),
 	same_suit(MATCH, 5, _).
-	%no_permutations(MATCH).
 
 hand(CARDS, straight, MATCH) :-
 	consecutive_values(CARDS, 5, MATCH).
