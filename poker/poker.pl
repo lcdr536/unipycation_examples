@@ -61,10 +61,6 @@ hand(Cards, full_house, Match) :-
 	of_a_kind(RemainCards, 2, MatchTwo),
 	append(MatchTwo, MatchThree, Match).
 
-hand(Cards, flush, Match) :-
-	select_n(Cards, 5, Match),
-	same_suit(Match, 5, _).
-
 hand(Cards, straight, Match) :-
 	consecutive_values(Cards, 5, Match).
 
