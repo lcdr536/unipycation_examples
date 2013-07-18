@@ -73,6 +73,9 @@ hand(CARDS, flush, MATCH) :-
 hand(CARDS, straight, MATCH) :-
 	consecutive_values(CARDS, 5, MATCH).
 
+hand(CARDS, three_of_a_kind, MATCH) :-
+    of_a_kind(CARDS, 3, MATCH).
+
 % ---[ Just for testing ]---------------------------------------------
 
 main(HANDNAME, MATCH) :-
@@ -81,6 +84,8 @@ main(HANDNAME, MATCH) :-
           card(10, diamonds),
           card(j, diamonds),
           card(q, diamonds),
+          card(q, hearts),
+          card(q, clubs),
           card(k, diamonds),
           card(a, diamonds)
       ],
