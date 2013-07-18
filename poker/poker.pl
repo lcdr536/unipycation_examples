@@ -27,14 +27,18 @@ consecutive_values(CARDS, C1, N_REQ, MATCH) :-
     N_REQ_NEXT is N_REQ - 1,
     consecutive_values(CARDS2, C2, N_REQ_NEXT, NEXT_MATCH).
 
-same_suit(CARDS) :-
-    select(card(_, SUIT), CARDS, CARDS_REMAIN),
-    all_suit(CARDS_REMAIN, SUIT), !.
+same_suit(CARDS, N_REQ, MATCH) :-
+    select(card(VAL, SUIT), CARDS, CARDS_REMAIN),
+    N_REQ_NEXT is N_REQ - 1,
+    MATCH = [ card(VAL, SUIT) | NEXT_MATCH ],
+    same_suit(CARDS_REMAIN, N_REQ_NEXT, SUIT, NEXT_MATCH), !.
 
-all_suit([], _).
-all_suit(CARDS, SUIT) :-
-	select(card(_, SUIT), CARDS, CARDS2),
-	all_suit(CARDS2, SUIT).
+same_suit(_, 0, _, []).
+same_suit(CARDS, N_REQ, SUIT, MATCH) :-
+	select(card(VAL, SUIT), CARDS, CARDS_REMAIN),
+	N_REQ_NEXT is N_REQ - 1,
+	MATCH = [ card(VAL, SUIT) | NEXT_MATCH ],
+	same_suit(CARDS_REMAIN, N_REQ_NEXT, SUIT, NEXT_MATCH).
 
 select_n(_, 0, []).
 select_n(CARDS, N, SELECTION) :-
@@ -50,13 +54,13 @@ hand(CARDS, four_of_a_kind, MATCH) :-
 
 hand(CARDS, straight_flush, MATCH) :-
     consecutive_values(CARDS, 5, MATCH),
-    same_suit(MATCH),
+    same_suit(MATCH, 5, _),
     MATCH = [ H | _ ],
     H \= card(10, _).
 
 hand(CARDS, royal_flush, MATCH) :-
     consecutive_values(CARDS, 5, MATCH),
-    same_suit(MATCH),
+    same_suit(MATCH, 5, _),
     MATCH = [ H | _ ],
     H = card(10, _).
 
@@ -68,7 +72,7 @@ hand(CARDS, full_house, MATCH) :-
 
 hand(CARDS, flush, MATCH) :-
 	select_n(CARDS, 5, MATCH),
-	same_suit(MATCH).
+	same_suit(MATCH, 5, _).
 
 hand(CARDS, straight, MATCH) :-
 	consecutive_values(CARDS, 5, MATCH).
@@ -97,10 +101,6 @@ main(HANDNAME, MATCH) :-
           card(10, diamonds),
           card(j, diamonds),
           card(q, diamonds),
-          card(q, hearts),
-          card(q, clubs),
-          card(k, diamonds),
-          card(k, hearts),
-          card(a, diamonds)
+          card(3, diamonds)
       ],
     hand(CARDS, HANDNAME, MATCH).
