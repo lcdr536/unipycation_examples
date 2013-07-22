@@ -1,11 +1,32 @@
 :- module(poker, [main/2]).
 
+% XXX needs to go into pyrolog
+select(X, [X|Tail], Tail).
+select(Elem, [Head|Tail], [Head|Rest]) :-
+	select(Elem, Tail, Rest).
+
+% XXX needs to go into pyrolog
+nextto(X, Y, [X,Y|_]).
+nextto(X, Y, [_|Zs]) :-
+	nextto(X, Y, Zs).
+
+% XXX needs to go into pyrolog
+subtract([], _, []) :- !.
+subtract([E|T], D, R) :-
+	memberchk(E, D), !,
+	subtract(T, D, R).
+subtract([H|T], D, [H|R]) :-
+	subtract(T, D, R).
+
+% XXX needs to go into pyrolog
+memberchk(Elem, List) :-
+	once(member(Elem, List)).
+
 value_order([2, 3, 4, 5, 6, 7, 8, 9, 10, j, q, k, a ]).
 
 next_in_value(card(Val1, _), card(Val2, _)) :-
 	value_order(L),
 	nextto(Val1, Val2, L).
-
 
 pick(H, [H | T], T).
 pick(H, [_ | T], T2) :- pick(H, T, T2).
