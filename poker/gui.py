@@ -10,6 +10,16 @@ class Card(object):
     def __init__(self, val, suit):
         self.value = val
         self.suit = suit.lower()
+        
+    def __getattr__(self, name):
+        """ Images are generated lazily """
+        if name == "image":
+            w = tk.PhotoImage(file=self.image_filename())
+            setattr(self, "image", w)
+            return w
+
+    def image_filename(self):
+        return "images/%s%s.svg.gif" % (self.value.upper(), self.suit.upper())
 
     def to_term(self, engine):
         return engine.terms.card(val, suit)
@@ -20,11 +30,16 @@ class Card(object):
 class RandomHands(object):
     """ The Game GUI itself """
 
-    # Only 52 cards, so no problem generating the whole deck
-    full_deck = [ Card(v, s) for v in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, "j", "q", "k", "a"] for s in "cshd"]
 
     def __init__(self):
         self.top = tk.Tk()
+
+        # Only 52 cards, so no problem generating the whole deck
+        # Has to happen after TK init.
+        self.full_deck = [ Card(v, s) for \
+                v in ["2", "3", "4", "5", "6", "7", "8", "9", "10", "j", "q", "k", "a"] for \
+                s in "cshd"]
+
         self.top.title("Random Poker Hands")
 
         with open("poker.pl", "r") as fh: pdb = fh.read()
@@ -37,12 +52,23 @@ class RandomHands(object):
         return card
 
     def _gen_hand(self, size=7):
-        deck = copy.copy(RandomHands.full_deck)
-        hand = [ RandomHands._draw_random(deck) for x in range(size) ]
+        deck = copy.copy(self.full_deck)
+        return [ RandomHands._draw_random(deck) for x in range(size) ]
 
-        for i in hand:
-            print(i)
+    def play(self):
+        hand = self._gen_hand()
+        images = [ x.image for x in hand ]
+        widgets = [ tk.Label(image=x) for x in images ]
+
+        for i in range(len(images)):
+            widgets[i].grid(column=i + 1, row=0)
+            #widgets[i].pack()
+
+        text = tk.Label(text="Hand:", font=("Helvetica", 16))
+        text.grid(column=0, row=0)
+
+        self.top.mainloop()
 
 if __name__ == "__main__":
     g = RandomHands()
-    g._gen_hand()
+    g.play()
