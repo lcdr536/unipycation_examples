@@ -1,0 +1,5 @@
+Images from here:
+https://code.google.com/p/vectorized-playing-cards/
+
+Converted using ImageMagick, for example:
+for i in *.svg; do  convert -shave 256x366 -scale 106x150 $i $i.gif; done
