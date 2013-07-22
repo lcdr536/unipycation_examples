@@ -58,6 +58,7 @@ class Connect4(object):
 
     def _collect_token_coords(self, colour):
         """ makes a prolog list of coords of a given colour """
+        assert colour in ["red", "yellow"]
         return [ (x, y) for x in range(COLS) for y in range(ROWS)
                 if self.cols[x][y]["background"] == colour ]
 
@@ -71,19 +72,12 @@ class Connect4(object):
             self.tokgen.next() # simulates "try again"
 
     def _check_win(self):
+        reds = [ self.pl_engine.terms.c(x, y) for \
+                (x, y) in self._collect_token_coords("red") ]
+        yellows = [ self.pl_engine.terms.c(x, y) for \
+                (x, y) in self._collect_token_coords("yellow") ]
 
-        # flatten a list into cons functors
-        # XXX make unipycation interface better to rid of this wart.
-        def build_prolog_list(elems):
-            if len(elems) == 0: return "[]"
-            (x, y) = elems[0]
-            coord = uni.Term("c", [x, y])
-            return uni.Term(".", [ coord, build_prolog_list(elems[1:]) ])
-
-        red_p_list = build_prolog_list(self._collect_token_coords("red"))
-        yellow_p_list = build_prolog_list(self._collect_token_coords("yellow"))
-
-        res = self.pl_engine.db.has_won(red_p_list, yellow_p_list, None)
+        res = self.pl_engine.db.has_won(reds, yellows, None)
         if res is not None:
             (winner, ) = res
             print("%s wins" % winner)
