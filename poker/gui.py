@@ -54,7 +54,8 @@ class RandomHands(object):
 
         # Stuff for storing and showing results
         self.result_iter = None
-        self.result_idx = 0
+        self.res_images = None # so we can erase them later
+        self.handname_label = None # so we can erase it later
 
     @staticmethod
     def _draw_random(deck):
@@ -80,16 +81,20 @@ class RandomHands(object):
             row += 1
         """
 
+    def _erase_result_from_gui(self):
+        if self.res_images is not None:
+            for i in self.res_images: i.grid_remove()
+            self.handname_label.grid_remove()
 
     def _draw_row_of_cards(self, cards, labeltext, rowno):
         images = [ x.image for x in cards ]
-        widgets = [ tk.Label(image=x) for x in images ]
+        self.res_images = widgets = [ tk.Label(image=x) for x in images ]
 
         for i in range(len(images)):
             widgets[i].grid(column=i + 1, row=rowno)
 
-        text = tk.Label(text=labeltext, font=("Helvetica", 16))
-        text.grid(column=0, row=rowno)
+        self.handname_label = tk.Label(text=labeltext, font=("Helvetica", 16))
+        self.handname_label.grid(column=0, row=rowno)
 
     """
     def _draw_winning_hand(self):
@@ -102,6 +107,7 @@ class RandomHands(object):
     """
 
     def _show_next_result(self):
+        self._erase_result_from_gui()
         try:
             (hand_name, cards) = self.result_iter.next()
         except StopIteration:
