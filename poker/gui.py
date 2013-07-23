@@ -57,6 +57,13 @@ class RandomHands(object):
         self.res_images = None # so we can erase them later
         self.handname_label = None # so we can erase it later
 
+        # draw some of the gui
+        sol_button = tk.Button(text="Next", command=self._show_next_result)
+        sol_button.grid(column=1, row=1, columnspan=3)
+
+        new_hand_button = tk.Button(text="New Hand", command=self.play)
+        new_hand_button.grid(column=4, row=1, columnspan=3)
+
     @staticmethod
     def _draw_random(deck):
         card = random.choice(deck)
@@ -88,13 +95,14 @@ class RandomHands(object):
 
     def _draw_row_of_cards(self, cards, labeltext, rowno):
         images = [ x.image for x in cards ]
-        self.res_images = widgets = [ tk.Label(image=x) for x in images ]
+        images_ws = [ tk.Label(image=x) for x in images ]
 
         for i in range(len(images)):
-            widgets[i].grid(column=i + 1, row=rowno)
+            images_ws[i].grid(column=i + 1, row=rowno)
 
-        self.handname_label = tk.Label(text=labeltext, font=("Helvetica", 16))
-        self.handname_label.grid(column=0, row=rowno)
+        handname_label = tk.Label(text=labeltext, font=("Helvetica", 16))
+        handname_label.grid(column=0, row=rowno)
+        return (handname_label, images_ws)
 
     """
     def _draw_winning_hand(self):
@@ -116,17 +124,11 @@ class RandomHands(object):
             return
 
         card_objs = [ Card.from_term(x) for x in cards ]
-        self._draw_row_of_cards(card_objs, hand_name, 2)
+        (self.handname_label, self.res_images) = self._draw_row_of_cards(card_objs, hand_name, 2)
 
     def play(self):
         hand = self._gen_hand()
         self._draw_row_of_cards(hand, "Hand:", 0)
-
-        sol_button = tk.Button(text="Next", command=self._show_next_result)
-        sol_button.grid(column=1, row=1, columnspan=3)
-
-        new_hand_button = tk.Button(text="New Hand")
-        new_hand_button.grid(column=4, row=1, columnspan=3)
 
         self._find_winning_hands(hand)
         self._show_next_result()
