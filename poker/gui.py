@@ -52,7 +52,9 @@ class RandomHands(object):
         self.engine = uni.Engine(pdb)
         self.engine.db.hand.many_solutions = True
 
-        #self.winning_hand_on_display = 0
+        # Stuff for storing and showing results
+        self.result_iter = None
+        self.result_idx = 0
 
     @staticmethod
     def _draw_random(deck):
@@ -67,14 +69,17 @@ class RandomHands(object):
     def _find_winning_hands(self, hand):
         hand_as_terms = [ x.to_term(self.engine) for x in hand ]
 
-        sols = self.engine.db.hand(hand_as_terms, None, None)
+        self.result_iter= self.engine.db.hand(hand_as_terms, None, None)
+
+        """
+        self.result_iter = 
         row = 2
         for (hand_name, cards) in sols:
             card_objs = [ Card.from_term(x) for x in cards ]
             self._draw_row_of_cards(card_objs, hand_name + ":", row)
             row += 1
+        """
 
-        self.winning_hand_on_display = 0
 
     def _draw_row_of_cards(self, cards, labeltext, rowno):
         images = [ x.image for x in cards ]
@@ -96,17 +101,29 @@ class RandomHands(object):
         self.winning_hand_on_display += 1
     """
 
+    def _show_next_result(self):
+        try:
+            (hand_name, cards) = self.result_iter.next()
+        except StopIteration:
+            # XXX blank the row
+            print("No more")
+            return
+
+        card_objs = [ Card.from_term(x) for x in cards ]
+        self._draw_row_of_cards(card_objs, hand_name, 2)
+
     def play(self):
         hand = self._gen_hand()
         self._draw_row_of_cards(hand, "Hand:", 0)
 
-        sol_button = tk.Button(text="Winning Hands")
+        sol_button = tk.Button(text="Next", command=self._show_next_result)
         sol_button.grid(column=1, row=1, columnspan=3)
 
         new_hand_button = tk.Button(text="New Hand")
         new_hand_button.grid(column=4, row=1, columnspan=3)
 
         self._find_winning_hands(hand)
+        self._show_next_result()
         self.top.mainloop()
 
 if __name__ == "__main__":
