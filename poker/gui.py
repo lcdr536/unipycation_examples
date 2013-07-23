@@ -35,7 +35,6 @@ class Card(object):
 class RandomHands(object):
     """ The Game GUI itself """
 
-
     def __init__(self):
         self.top = tk.Tk()
         self.scroll = tk.Scrollbar(self.top, orient=tk.VERTICAL)
@@ -76,17 +75,7 @@ class RandomHands(object):
 
     def _find_winning_hands(self, hand):
         hand_as_terms = [ x.to_term(self.engine) for x in hand ]
-
         self.result_iter= self.engine.db.hand(hand_as_terms, None, None)
-
-        """
-        self.result_iter = 
-        row = 2
-        for (hand_name, cards) in sols:
-            card_objs = [ Card.from_term(x) for x in cards ]
-            self._draw_row_of_cards(card_objs, hand_name + ":", row)
-            row += 1
-        """
 
     def _erase_result_from_gui(self):
         if self.res_images is not None:
@@ -104,24 +93,12 @@ class RandomHands(object):
         handname_label.grid(column=0, row=rowno)
         return (handname_label, images_ws)
 
-    """
-    def _draw_winning_hand(self):
-        #self._draw_row_of_cards(, hand_name + ":", row)
-    """
-
-    """
-    def _show_next_winning_hand(self):
-        self.winning_hand_on_display += 1
-    """
-
     def _show_next_result(self):
         self._erase_result_from_gui()
         try:
             (hand_name, cards) = self.result_iter.next()
         except StopIteration:
-            # XXX blank the row
-            print("No more")
-            return
+            return # No more
 
         card_objs = [ Card.from_term(x) for x in cards ]
         (self.handname_label, self.res_images) = self._draw_row_of_cards(card_objs, hand_name, 2)
