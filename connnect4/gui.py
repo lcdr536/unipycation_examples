@@ -15,7 +15,7 @@ def tokengen():
 class Connect4(object):
     def __init__(self):
         self.top = tk.Tk()
-        self.top.title("Connect 4 GUI (Python)")
+        self.top.title("Unipycation: Connect 4 GUI (Python)")
         self.tokgen = tokengen()
 
         with open("c42.pl", "r") as f: pdb = f.read()
@@ -67,9 +67,8 @@ class Connect4(object):
             if but["background"] not in ["red", "yellow"]:
                 but["background"] = self.tokgen.next()
                 self._check_win()
-                break
-        else:
-            self.tokgen.next() # simulates "try again"
+                return
+        print("column full, try again")
 
     def _check_win(self):
         reds = [ self.pl_engine.terms.c(x, y) for \
