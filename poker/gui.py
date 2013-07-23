@@ -24,6 +24,11 @@ class Card(object):
     def to_term(self, engine):
         return engine.terms.card(self.value, self.suit)
 
+    @staticmethod
+    def from_term(c):
+        assert isinstance(c, uni.Term) and c.name == "card"
+        return Card(c.args[0], c.args[1])
+
     def __str__(self):
         return "Card: %2s of %s" % (self.value, Card.suitnames[self.suit])
 
@@ -33,6 +38,7 @@ class RandomHands(object):
 
     def __init__(self):
         self.top = tk.Tk()
+        self.scroll = tk.Scrollbar(self.top, orient=tk.VERTICAL)
 
         # Only 52 cards, so no problem generating the whole deck
         # Has to happen after TK init.
@@ -45,6 +51,8 @@ class RandomHands(object):
         with open("poker.pl", "r") as fh: pdb = fh.read()
         self.engine = uni.Engine(pdb)
         self.engine.db.hand.many_solutions = True
+
+        #self.winning_hand_on_display = 0
 
     @staticmethod
     def _draw_random(deck):
@@ -60,9 +68,13 @@ class RandomHands(object):
         hand_as_terms = [ x.to_term(self.engine) for x in hand ]
 
         sols = self.engine.db.hand(hand_as_terms, None, None)
-        print(sols)
+        row = 2
         for (hand_name, cards) in sols:
-            print("HAND: %s   CARDS: %s" % (hand_name, cards))
+            card_objs = [ Card.from_term(x) for x in cards ]
+            self._draw_row_of_cards(card_objs, hand_name + ":", row)
+            row += 1
+
+        self.winning_hand_on_display = 0
 
     def _draw_row_of_cards(self, cards, labeltext, rowno):
         images = [ x.image for x in cards ]
@@ -73,6 +85,16 @@ class RandomHands(object):
 
         text = tk.Label(text=labeltext, font=("Helvetica", 16))
         text.grid(column=0, row=rowno)
+
+    """
+    def _draw_winning_hand(self):
+        #self._draw_row_of_cards(, hand_name + ":", row)
+    """
+
+    """
+    def _show_next_winning_hand(self):
+        self.winning_hand_on_display += 1
+    """
 
     def play(self):
         hand = self._gen_hand()
