@@ -1,9 +1,14 @@
 :- module(poker, [main/2]).
 
+% XXX should aready be in pyrolog?!
+member(E, [E | _]).
+member(E, [_ | T]) :-
+	member(E, T).
+
 % XXX needs to go into pyrolog
 select(X, [X|Tail], Tail).
 select(Elem, [Head|Tail], [Head|Rest]) :-
-	select(Elem, Tail, Rest).
+select(Elem, Tail, Rest).
 
 % XXX needs to go into pyrolog
 nextto(X, Y, [X,Y|_]).
@@ -60,12 +65,13 @@ same_suit(Cards, NReq, Suit, [ card(Val, Suit) | NextMatch ]) :-
 	pick(card(Val, Suit), Cards, CardsRemain),
 	same_suit(CardsRemain, NReqNext, Suit, NextMatch).
 
-select_n(_, 0, []).
-select_n(Cards, N, Selection) :-
-	select(C, Cards, CardsRemain),
-	NextN is N - 1,
-	Selection = [ C | NextSelection ],
-	select_n(CardsRemain, NextN, NextSelection).
+% XXX can go???
+%select_n(_, 0, []).
+%select_n(Cards, N, Selection) :-
+%	select(C, Cards, CardsRemain),
+%	NextN is N - 1,
+%	Selection = [ C | NextSelection ],
+%	select_n(CardsRemain, NextN, NextSelection).
 
 % ---[ Begin Winning Hands ]------------------------------------------
 
