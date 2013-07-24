@@ -9,7 +9,7 @@ class Card(object):
 
     def __init__(self, val, suit):
         self.value = val
-        self.suit = suit.lower()
+        if suit is not None: self.suit = suit.lower()
 
     def __getattr__(self, name):
         """ Images are generated lazily """
@@ -19,6 +19,7 @@ class Card(object):
             return w
 
     def image_filename(self):
+        if self.value is None or self.suit is None: return "images/blank.svg.gif"
         return "images/%s%s.svg.gif" % (self.value.upper(), self.suit.upper())
 
     def to_term(self, engine):
@@ -34,6 +35,8 @@ class Card(object):
 
 class RandomHands(object):
     """ The Game GUI itself """
+
+    HANDSIZE = 7
 
     def __init__(self):
         self.top = tk.Tk()
@@ -63,15 +66,20 @@ class RandomHands(object):
         new_hand_button = tk.Button(text="New Hand", command=self.play)
         new_hand_button.grid(column=4, row=1, columnspan=3)
 
+        # Once there are no more solutions, we show blank "grayed out" cards
+        self.blank_card = Card(None, None)
+        self.blank_hand = [ self.blank_card for x in range(RandomHands.HANDSIZE) ]
+
     @staticmethod
     def _draw_random(deck):
         card = random.choice(deck)
         deck.remove(card)
         return card
 
-    def _gen_hand(self, size=7):
+    def _gen_hand(self):
         deck = copy.copy(self.full_deck)
-        return [ RandomHands._draw_random(deck) for x in range(size) ]
+        return [ RandomHands._draw_random(deck) for \
+                x in range(RandomHands.HANDSIZE) ]
 
     def _find_winning_hands(self, hand):
         hand_as_terms = [ x.to_term(self.engine) for x in hand ]
@@ -83,13 +91,19 @@ class RandomHands(object):
             self.handname_label.grid_remove()
 
     def _draw_row_of_cards(self, cards, labeltext, rowno):
+
+        # Pad up to a hand size with blankers
+        if len(cards) < RandomHands.HANDSIZE:
+            pad = RandomHands.HANDSIZE - len(cards)
+            cards += [ self.blank_card for x in range(pad) ]
+
         images = [ x.image for x in cards ]
         images_ws = [ tk.Label(image=x) for x in images ]
 
         for i in range(len(images)):
             images_ws[i].grid(column=i + 1, row=rowno)
 
-        handname_label = tk.Label(text=labeltext, font=("Helvetica", 16))
+        handname_label = tk.Label(width=10, text=labeltext, font=("Helvetica", 16))
         handname_label.grid(column=0, row=rowno)
         return (handname_label, images_ws)
 
@@ -98,6 +112,7 @@ class RandomHands(object):
         try:
             (hand_name, cards) = self.result_iter.next()
         except StopIteration:
+            self._draw_row_of_cards(self.blank_hand, "No more", 2)
             return # No more
 
         card_objs = [ Card.from_term(x) for x in cards ]
@@ -106,7 +121,6 @@ class RandomHands(object):
     def play(self):
         hand = self._gen_hand()
 
-        # XXX debug gunk
         print(72 * "-")
         for i in hand:
             print(i)
