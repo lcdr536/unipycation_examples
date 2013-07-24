@@ -65,14 +65,6 @@ same_suit(Cards, NReq, Suit, [ card(Val, Suit) | NextMatch ]) :-
 	pick(card(Val, Suit), Cards, CardsRemain),
 	same_suit(CardsRemain, NReqNext, Suit, NextMatch).
 
-% XXX can go???
-%select_n(_, 0, []).
-%select_n(Cards, N, Selection) :-
-%	select(C, Cards, CardsRemain),
-%	NextN is N - 1,
-%	Selection = [ C | NextSelection ],
-%	select_n(CardsRemain, NextN, NextSelection).
-
 % ---[ Begin Winning Hands ]------------------------------------------
 
 hand(Cards, four_of_a_kind, Match) :-
