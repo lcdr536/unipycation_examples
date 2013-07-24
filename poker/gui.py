@@ -10,7 +10,7 @@ class Card(object):
     def __init__(self, val, suit):
         self.value = val
         self.suit = suit.lower()
-        
+
     def __getattr__(self, name):
         """ Images are generated lazily """
         if name == "image":
@@ -105,8 +105,13 @@ class RandomHands(object):
 
     def play(self):
         hand = self._gen_hand()
-        self._draw_row_of_cards(hand, "Hand:", 0)
 
+        # XXX debug gunk
+        print(72 * "-")
+        for i in hand:
+            print(i)
+
+        self._draw_row_of_cards(hand, "Hand:", 0)
         self._find_winning_hands(hand)
         self._show_next_result()
         self.top.mainloop()
