@@ -63,7 +63,7 @@ class RandomHands(object):
         sol_button = tk.Button(text="Next", command=self._show_next_result)
         sol_button.grid(column=1, row=1, columnspan=3)
 
-        new_hand_button = tk.Button(text="New Hand", command=self.play)
+        new_hand_button = tk.Button(text="New Hand", command=self._new_hand)
         new_hand_button.grid(column=4, row=1, columnspan=3)
 
         # Once there are no more solutions, we show blank "grayed out" cards
@@ -118,7 +118,7 @@ class RandomHands(object):
         card_objs = [ Card.from_term(x) for x in cards ]
         (self.handname_label, self.res_images) = self._draw_row_of_cards(card_objs, hand_name, 2)
 
-    def play(self):
+    def _new_hand(self):
         hand = self._gen_hand()
 
         print(72 * "-")
@@ -128,6 +128,9 @@ class RandomHands(object):
         self._draw_row_of_cards(hand, "Hand:", 0)
         self._find_winning_hands(hand)
         self._show_next_result()
+
+    def play(self):
+        self._new_hand()
         self.top.mainloop()
 
 if __name__ == "__main__":
