@@ -50,7 +50,25 @@ test(three_of_a_kind) :-
 	findall(HandPerm, permutation(Hand, HandPerm), Perms),
 	memberchk(Res, Perms).
 
+test(two_pair) :-
+	Hand = [ card(7, h), card(7, d), card(a, s), card(a, c) ],
+	findall(Match, hand(Hand, two_pair, Match), Results),
+	length(Results, 1),
+	Results = [ Res | _ ],
+	findall(HandPerm, permutation(Hand, HandPerm), Perms),
+	memberchk(Res, Perms).
+
+test(one_pair) :-
+	Hand = [ card(a, s), card(a, c) ],
+	findall(Match, hand(Hand, one_pair, Match), Results),
+	length(Results, 1),
+	Results = [ Res | _ ],
+	findall(HandPerm, permutation(Hand, HandPerm), Perms),
+	memberchk(Res, Perms).
+
 test(high_card, all(Match == [[card(4, s)]])) :-
 	hand([card(4, s)], high_card, Match).
+
+% XXX test overlap of various hands, should this be allowed?
 
 :- end_tests(poker).
