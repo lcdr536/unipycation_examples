@@ -34,7 +34,7 @@ same_suit(Cards, NReq, Match) :-
 
 same_suit(_, 0, _, []).
 same_suit(Cards, NReq, Suit, [ card(Val, Suit) | NextMatch ]) :-
-        NReq > 1, NReqNext is NReq - 1,
+        NReq >= 1, NReqNext is NReq - 1,
 	pick(card(Val, Suit), Cards, CardsRemain),
 	same_suit(CardsRemain, NReqNext, Suit, NextMatch).
 
