@@ -62,7 +62,10 @@ hand(Cards, three_of_a_kind, Match) :-
 hand(Cards, two_pair, Match) :-
 	of_a_kind(Cards, 2, Match1),
 	subtract(Cards, Match1, RemainCards),
+	Match1 = [ _, M1_2],
 	of_a_kind(RemainCards, 2, Match2),
+	Match2 = [ M2_1, _],
+	min_member(M1_2, [M1_2, M2_1]), % prevents same pair in different order
 	append(Match2, Match1, Match).
 
 hand(Cards, one_pair, Match) :-
