@@ -65,6 +65,15 @@ staticval_counter(OnePlayersCounters, WorkCounter, CounterVal) :-
 	findall(1, find_consecutive(OnePlayersCounters, 2, WorkCounter), List),
 	length(List, CounterVal).
 
+moves(Pos, Moves) :-
+	board_width(W),
+	moves(Pos, Moves, W).
+
+%moves(_, [], -1)
+%moves(pos(Reds, Yellows, WhoseMove), Moves, Col) :-
+%	findall(c(Col, y), member(c(Col, y)
+	
+
 % Just testing
 test(V) :-
 	Reds = [ c(1, 1), c(2, 1), c(1, 2), c(6, 5), c(6, 4) ],
