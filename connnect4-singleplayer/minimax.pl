@@ -5,6 +5,8 @@
 
 % The alpha-beta algorithm
 
+:- module(minimax, [alphabeta/5]).
+
 alphabeta( Pos, Alpha, Beta, GoodPos, Val)  :-
   moves( Pos, PosList), !,
   boundedbest( PosList, Alpha, Beta, GoodPos, Val);

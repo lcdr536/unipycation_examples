@@ -39,3 +39,27 @@ main(WINNER):-
 	REDS = [ c(1, 1), c(2, 2), c(3, 3), c(4, 4) ],
 	YELLOWS = [ c(3, 4), c(4, 4), c(5, 4), c(6, 4)],
 	has_won(REDS, YELLOWS, WINNER).
+
+% Stuff for the minimax solver.
+
+% Let's say Pos is:
+% pos(reds, yellows, turn)
+% 
+% where turn is yellow/red
+
+staticval(pos(reds, yellows, turn), Val) :-
+	staticval_player(reds, reds, ValRed),
+	staticval_player(yellows, yellows, ValYellow),
+	Val is ValRed - ValYellow.
+
+% Collects the score of a single player.
+staticval_player(AllPlayerCounters, [], 0). % No work left, we are done.
+
+staticval_player(AllPlayerCounters, [WorkCounter | OtherWorkCounters], Val) :-
+	staticval_counter(AllPlayerCounters, WorkCounter, CounterVal),
+	staticval_player(AllPlayerCounters, OtherWorkCounters, OtherCounterVals),
+	Val is CounterVal + OtherCounterVals.
+
+% Collects the score of a single counter
+staticval_counter(AllPlayerCounters, WorkCounter, CounterVal) :-
+	true. % XXX
