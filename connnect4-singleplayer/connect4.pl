@@ -43,23 +43,34 @@ main(WINNER):-
 % Stuff for the minimax solver.
 
 % Let's say Pos is:
-% pos(reds, yellows, turn)
-% 
-% where turn is yellow/red
+% pos(reds, yellows)
 
-staticval(pos(reds, yellows, turn), Val) :-
-	staticval_player(reds, reds, ValRed),
-	staticval_player(yellows, yellows, ValYellow),
+% Collects the cost of the game with respect to the incoming pos
+% Note that the board state is not checked to be valid.
+staticval(pos(RedCounters, YellowCounters), Val) :-
+	staticval_player(RedCounters, RedCounters, ValRed),
+	staticval_player(YellowCounters, YellowCounters, ValYellow),
+	format("~k vs ~k~n", [ValRed, ValYellow]),
 	Val is ValRed - ValYellow.
 
 % Collects the score of a single player.
 staticval_player(_, [], 0). % No work left, we are done.
 
-staticval_player(AllPlayerCounters, [WorkCounter | OtherWorkCounters], Val) :-
-	staticval_counter(AllPlayerCounters, WorkCounter, CounterVal),
-	staticval_player(AllPlayerCounters, OtherWorkCounters, OtherCounterVals),
+staticval_player(OnePlayersCounters, [WorkCounter | OtherWorkCounters], Val) :-
+	staticval_counter(OnePlayersCounters, WorkCounter, CounterVal),
+	staticval_player(OnePlayersCounters, OtherWorkCounters, OtherCounterVals),
 	Val is CounterVal + OtherCounterVals.
 
 % Collects the score of a single counter
-staticval_counter(AllPlayerCounters, WorkCounter, CounterVal) :-
-	true. % XXX
+staticval_counter(OnePlayersCounters, WorkCounter, CounterVal) :-
+	find_consecutive(OnePlayersCounters, 2, WorkCounter), CounterVal = 1.
+
+staticval_counter(OnePlayersCounters, WorkCounter, CounterVal) :-
+	\+ find_consecutive(OnePlayersCounters, 2, WorkCounter),!, CounterVal = 0.
+
+%staticval_counter(_, _, 0).
+
+test(V) :-
+	Reds = [ c(1, 1), c(2, 1), c(1, 2) ],
+	Yellows = [ c(3, 1), c(4, 1), (5, 1), (6, 1)],
+	staticval(pos(Reds, Yellows), V).
