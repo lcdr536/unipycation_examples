@@ -50,12 +50,11 @@ main(WINNER):-
 staticval(pos(RedCounters, YellowCounters), Val) :-
 	staticval_player(RedCounters, RedCounters, ValRed),
 	staticval_player(YellowCounters, YellowCounters, ValYellow),
-	format("~k vs ~k~n", [ValRed, ValYellow]),
+	format("Red ~k vs Yellow ~k~n", [ValRed, ValYellow]),
 	Val is ValRed - ValYellow.
 
-% Collects the score of a single player.
+% Collects the score of a single player's counters.
 staticval_player(_, [], 0). % No work left, we are done.
-
 staticval_player(OnePlayersCounters, [WorkCounter | OtherWorkCounters], Val) :-
 	staticval_counter(OnePlayersCounters, WorkCounter, CounterVal),
 	staticval_player(OnePlayersCounters, OtherWorkCounters, OtherCounterVals),
@@ -63,14 +62,11 @@ staticval_player(OnePlayersCounters, [WorkCounter | OtherWorkCounters], Val) :-
 
 % Collects the score of a single counter
 staticval_counter(OnePlayersCounters, WorkCounter, CounterVal) :-
-	find_consecutive(OnePlayersCounters, 2, WorkCounter), CounterVal = 1.
+	findall(1, find_consecutive(OnePlayersCounters, 2, WorkCounter), List),
+	length(List, CounterVal).
 
-staticval_counter(OnePlayersCounters, WorkCounter, CounterVal) :-
-	\+ find_consecutive(OnePlayersCounters, 2, WorkCounter),!, CounterVal = 0.
-
-%staticval_counter(_, _, 0).
-
+% Just testing
 test(V) :-
-	Reds = [ c(1, 1), c(2, 1), c(1, 2) ],
+	Reds = [ c(1, 1), c(2, 1), c(1, 2), c(6, 5), c(6, 4) ],
 	Yellows = [ c(3, 1), c(4, 1), (5, 1), (6, 1)],
 	staticval(pos(Reds, Yellows), V).
