@@ -18,7 +18,7 @@ class Connect4(object):
         self.top.title("Unipycation: Connect 4 GUI (Python)")
         self.tokgen = tokengen()
 
-        with open("c42.pl", "r") as f: pdb = f.read()
+        with open("connect4.pl", "r") as f: pdb = f.read()
         self.pl_engine = uni.Engine(pdb)
 
         self.cols = []

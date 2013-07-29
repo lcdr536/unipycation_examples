@@ -10,28 +10,28 @@ member1(E, [E | _]).
 member1(E, [_ | T]) :-
 	member1(E, T).
 	
-search_vector(_, _, _, 4).
-search_vector(COINS, c(X, Y), v(XD, YD), CT) :-
+search_vector(_, _, _, Required, Required).
+search_vector(COINS, c(X, Y), v(XD, YD), Required, CT) :-
 	board_width(W), -1 < X, X < W,
 	board_height(H), -1 < Y, Y < H,
 	member1(c(X, Y), COINS),
 	NEXT_CT is CT + 1,
 	NEXT_X is X + XD,
 	NEXT_Y is Y + YD,
-	search_vector(COINS, c(NEXT_X, NEXT_Y), v(XD, YD), NEXT_CT).
+	search_vector(COINS, c(NEXT_X, NEXT_Y), v(XD, YD), Required, NEXT_CT).
 
-find_consecutive(COINS, C) :-
-	direction(VEC, DESCR),
-	search_vector(COINS, C, VEC, 0).
+find_consecutive(COINS, Required, C) :-
+	direction(VEC, _),
+	search_vector(COINS, C, VEC, Required, 0).
 	%format("~p win at ~p~n", [DESCR, C]).
 
 has_won(REDS, _, red) :-
 	member1(C, REDS),
-	find_consecutive(REDS, C), !.
+	find_consecutive(REDS, 4, C), !.
 
 has_won(_, YELLOWS, yellow) :-
 	member1(C, YELLOWS),
-	find_consecutive(YELLOWS, C), !.
+	find_consecutive(YELLOWS, 4, C), !.
 
 % Test case
 % Note the validity of the board is not checked.
@@ -53,7 +53,7 @@ staticval(pos(reds, yellows, turn), Val) :-
 	Val is ValRed - ValYellow.
 
 % Collects the score of a single player.
-staticval_player(AllPlayerCounters, [], 0). % No work left, we are done.
+staticval_player(_, [], 0). % No work left, we are done.
 
 staticval_player(AllPlayerCounters, [WorkCounter | OtherWorkCounters], Val) :-
 	staticval_counter(AllPlayerCounters, WorkCounter, CounterVal),
