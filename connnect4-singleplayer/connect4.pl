@@ -43,11 +43,11 @@ main(WINNER):-
 % Stuff for the minimax solver.
 
 % Let's say Pos is:
-% pos(reds, yellows)
+% pos(Reds, Yellows, WhoseMove)
 
 % Collects the cost of the game with respect to the incoming pos
 % Note that the board state is not checked to be valid.
-staticval(pos(RedCounters, YellowCounters), Val) :-
+staticval(pos(RedCounters, YellowCounters, _), Val) :-
 	staticval_player(RedCounters, RedCounters, ValRed),
 	staticval_player(YellowCounters, YellowCounters, ValYellow),
 	format("Red ~k vs Yellow ~k~n", [ValRed, ValYellow]),
@@ -69,4 +69,4 @@ staticval_counter(OnePlayersCounters, WorkCounter, CounterVal) :-
 test(V) :-
 	Reds = [ c(1, 1), c(2, 1), c(1, 2), c(6, 5), c(6, 4) ],
 	Yellows = [ c(3, 1), c(4, 1), (5, 1), (6, 1)],
-	staticval(pos(Reds, Yellows), V).
+	staticval(pos(Reds, Yellows, red), V).
