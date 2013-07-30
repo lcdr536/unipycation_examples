@@ -1,3 +1,5 @@
+%:- use_module(minimax).
+
 board_width(7).
 board_height(6).
 
@@ -40,7 +42,7 @@ main(WINNER):-
 	YELLOWS = [ c(3, 4), c(4, 4), c(5, 4), c(6, 4)],
 	has_won(REDS, YELLOWS, WINNER).
 
-% Stuff for the minimax solver.
+% ---/// Stuff for the minimax solver ///---
 
 % Let's say Pos is:
 % pos(Reds, Yellows, WhoseMove)
@@ -65,17 +67,54 @@ staticval_counter(OnePlayersCounters, WorkCounter, CounterVal) :-
 	findall(1, find_consecutive(OnePlayersCounters, 2, WorkCounter), List),
 	length(List, CounterVal).
 
+% Finds how high a token would sit when inserted
+get_insert_y(Toks, Col, YVal) :-
+	findall(Y, member(c(Col, Y), Toks), Ys),
+	(length(Ys, 0) -> (
+		YVal = 0
+	); (
+		max_member(TopY, Ys),
+		YVal is TopY + 1
+	)).
+
+% Computes the new board state should we insert a token
+insert_token(pos(Reds, Yellows, WhoseMove), Col, Move) :-
+	append(Reds, Yellows, AllToks),
+	get_insert_y(AllToks, Col, Y),
+	(WhoseMove = red -> (
+		append(Reds, [c(Col, Y)], NewReds),
+		Move = pos(NewReds, Yellows, yellow)
+	) ; (
+		append(Yellows, [c(Col, Y)], NewYellows),
+		Move = pos(Reds, NewYellows, red)
+	)).
+
+% Find all possible subsequent game states
 moves(Pos, Moves) :-
-	board_width(W),
-	moves(Pos, Moves, W).
+	board_width(Width), Col is Width - 1,
+	findall(Move, moves(Pos, Move, Col), Moves).
 
-%moves(_, [], -1)
-%moves(pos(Reds, Yellows, WhoseMove), Moves, Col) :-
-%	findall(c(Col, y), member(c(Col, y)
+moves(pos(Reds, Yellows, WhoseMove), Move, Col) :-
+	board_width(W), Col < W, Col > -1,
+	board_height(H), TopSlot is H - 1,
+	\+ member(c(Col, TopSlot), Reds),
+	\+ member(c(Col, TopSlot), Yellows),
+	insert_token(pos(Reds, Yellows, WhoseMove), Col, Move). % space in this col
+moves(pos(Reds, Yellows, WhoseMove), Move, Col) :-
+	Col > -1, NextCol is Col - 1,
+	moves(pos(Reds, Yellows, WhoseMove), Move, NextCol). % search next col
+
+% Just for debugging
+print_moves([]).
+print_moves([Move | Others]) :-
+	staticval(Move, Val),
+	format("~p = ~p~n", [Move, Val]),
+	print_moves(Others).
 	
-
 % Just testing
-test(V) :-
-	Reds = [ c(1, 1), c(2, 1), c(1, 2), c(6, 5), c(6, 4) ],
-	Yellows = [ c(3, 1), c(4, 1), (5, 1), (6, 1)],
-	staticval(pos(Reds, Yellows, red), V).
+test :-
+	Reds = [c(0, 0), c(0, 1)],
+	Yellows = [c(1, 0), c(1, 1), c(2, 0)],
+	Pos = pos(Reds, Yellows, red),
+	moves(Pos, Moves),
+	print_moves(Moves).
