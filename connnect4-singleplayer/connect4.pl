@@ -1,4 +1,4 @@
-%:- use_module(minimax).
+:- use_module(minimax).
 
 board_width(7).
 board_height(6).
@@ -52,7 +52,7 @@ main(WINNER):-
 staticval(pos(RedCounters, YellowCounters, _), Val) :-
 	staticval_player(RedCounters, RedCounters, ValRed),
 	staticval_player(YellowCounters, YellowCounters, ValYellow),
-	format("Red ~k vs Yellow ~k~n", [ValRed, ValYellow]),
+	%format("Red ~k vs Yellow ~k~n", [ValRed, ValYellow]),
 	Val is ValRed - ValYellow.
 
 % Collects the score of a single player's counters.
@@ -108,13 +108,21 @@ moves(pos(Reds, Yellows, WhoseMove), Move, Col) :-
 print_moves([]).
 print_moves([Move | Others]) :-
 	staticval(Move, Val),
-	format("~p = ~p~n", [Move, Val]),
+	%format("~p = ~p~n", [Move, Val]),
+	write(Move),nl,
+	write(Val),nl,
 	print_moves(Others).
+
+min_to_move(pos(_, _, red)).
+max_to_move(pos(_, _, yellow)).
 	
 % Just testing
-test :-
+test(GoodPos, Val) :-
 	Reds = [c(0, 0), c(0, 1)],
 	Yellows = [c(1, 0), c(1, 1), c(2, 0)],
 	Pos = pos(Reds, Yellows, red),
-	moves(Pos, Moves),
-	print_moves(Moves).
+	alphabeta(Pos, -99999, 99999, GoodPos, Val).
+	%moves(Pos, Moves),
+	%print_moves(Moves).
+	%write(GoodPos), nl,
+	%write(Val), nl.
