@@ -112,4 +112,4 @@ test(GoodPos, Val) :-
 	Reds = [c(0, 0), c(0, 1), c(0, 2)],
 	Yellows = [],
 	Pos = pos(Reds, Yellows, red),
-	alphabeta(Pos, -99999, 99999, GoodPos, Val, 5).
+	alphabeta(Pos, -99999, 99999, GoodPos, Val, 6).

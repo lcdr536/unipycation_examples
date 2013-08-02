@@ -13,10 +13,12 @@ def token_click_closure(c4, colno):
 #        yield "yellow"
 
 class Connect4(object):
+    UI_DEPTH = 4 # lookahead for minimax
+
     def __init__(self):
         self.top = tk.Tk()
         self.top.title("Unipycation: Connect 4 GUI (Python)")
-        self.tokgen = tokengen()
+        #self.tokgen = tokengen()
 
         with open("connect4.pl", "r") as f: pdb = f.read()
         self.pl_engine = uni.Engine(pdb)
@@ -62,15 +64,33 @@ class Connect4(object):
         return [ (x, y) for x in range(COLS) for y in range(ROWS)
                 if self.cols[x][y]["background"] == colour ]
 
+    def _update_from_pos_one_colour(self, term_list, colour):
+        assert colour in ["red", "yellow"]
+
+        print("The list is of length %d: %s" % (len(term_list), term_list))
+        for c in term_list:
+            if c == "[]": continue # XXX bug
+            assert c.name == "c"
+            (x, y) = (c.args[0], c.args[1])
+            self.cols[x][y]["background"] = colour
+
+    def _update_from_pos(self, pos):
+        """ update the game state from the result of alphabeta """
+        self._update_from_pos_one_colour(pos.args[0], "red")
+        self._update_from_pos_one_colour(pos.args[1], "yellow")
+
     def _ai_move(self):
         """ Let the AI take their turn. Uses minimax """
+        print("AI here goes")
 
         # encode the current board and whose move (yellow for ai)
         (reds, yellows) = self._counters_to_terms()
-        pos = self.pl_engine.terms.pos(reds, yellows, "yellow")
+        Pos = self.pl_engine.terms.pos(reds, yellows, "yellow")
 
-        # XXX call prolog
-        pass
+        sol = (goodpos, val) = self.pl_engine.db.alphabeta(Pos, -99999, 99999, None, None, Connect4.UI_DEPTH)
+        print("New board cost: %s" % val)
+        print(goodpos)
+        self._update_from_pos(goodpos)
 
     def _insert(self, colno):
         for but in reversed(self.cols[colno]):
