@@ -7,18 +7,12 @@ COLS = 7
 def token_click_closure(c4, colno):
     return lambda : c4._insert(colno)
 
-#def tokengen():
-#    while True:
-#        yield "red"
-#        yield "yellow"
-
 class Connect4(object):
     UI_DEPTH = 4 # lookahead for minimax
 
     def __init__(self):
         self.top = tk.Tk()
         self.top.title("Unipycation: Connect 4 GUI (Python)")
-        #self.tokgen = tokengen()
 
         with open("connect4.pl", "r") as f: pdb = f.read()
         self.pl_engine = uni.Engine(pdb)
@@ -82,7 +76,6 @@ class Connect4(object):
         pylist = unwrap_prolog_list(term_list)
         print("The list is of length %d: %s" % (len(pylist), pylist))
         for c in pylist:
-            if c == "[]": continue # XXX bug
             assert c.name == "c"
             (x, y) = (c.args[0], c.args[1])
             self.cols[x][y]["background"] = colour
