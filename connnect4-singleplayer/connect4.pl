@@ -69,10 +69,11 @@ staticval_counter(OnePlayersCounters, WorkCounter, CounterVal) :-
 get_insert_y(Toks, Col, YVal) :-
 	findall(Y, member(c(Col, Y), Toks), Ys),
 	(length(Ys, 0) -> (
-		YVal = 0
+        board_height(H),
+        YVal is H - 1
 	); (
-		max_member(TopY, Ys),
-		YVal is TopY + 1
+		min_member(TopY, Ys),
+        YVal is TopY - 1
 	)).
 
 % Computes the new board state should we insert a token
@@ -96,9 +97,9 @@ moves(Pos, Moves) :-
 
 moves(pos(Reds, Yellows, WhoseMove), Move, Col) :-
 	board_width(W), Col < W, Col > -1,
-	board_height(H), TopSlot is H - 1,
-	\+ member(c(Col, TopSlot), Reds),
-	\+ member(c(Col, TopSlot), Yellows),
+    %board_height(H), TopSlot is H - 1,
+	\+ member(c(Col, 0), Reds),
+	\+ member(c(Col, 0), Yellows),
 	insert_token(pos(Reds, Yellows, WhoseMove), Col, Move). % space in this col
 moves(pos(Reds, Yellows, WhoseMove), Move, Col) :-
 	Col > -1, NextCol is Col - 1,
