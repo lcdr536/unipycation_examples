@@ -49,11 +49,15 @@ main(WINNER):-
 
 % Collects the cost of the game with respect to the incoming pos
 % Note that the board state is not checked to be valid.
+staticval(pos(RedCounters, YellowCounters, _), WinVal) :-
+	has_won(RedCounters, YellowCounters, WhoWon), !,
+	(WhoWon = red -> WinVal = -99999; WinVal = 99999), !. % heavy weights for win
+
 staticval(pos(RedCounters, YellowCounters, _), Val) :-
 	staticval_player(RedCounters, RedCounters, ValRed),
 	staticval_player(YellowCounters, YellowCounters, ValYellow),
 	%format("Red ~k vs Yellow ~k~n", [ValRed, ValYellow]),
-	Val is ValRed - ValYellow.
+	Val is ValYellow - ValRed.
 
 % Collects the score of a single player's counters.
 staticval_player(_, [], 0). % No work left, we are done.
@@ -118,10 +122,10 @@ max_to_move(pos(_, _, yellow)).
 	
 % Just testing
 test(GoodPos, Val) :-
-	Reds = [c(0, 0), c(0, 1)],
-	Yellows = [c(1, 0), c(1, 1), c(2, 0)],
+	Reds = [c(0, 0), c(0, 1), c(0, 2)],
+	Yellows = [],
 	Pos = pos(Reds, Yellows, red),
-	alphabeta(Pos, -99999, 99999, GoodPos, Val, 10).
+	alphabeta(Pos, -99999, 99999, GoodPos, Val, 5).
 	%moves(Pos, Moves),
 	%print_moves(Moves).
 	%write(GoodPos), nl,
