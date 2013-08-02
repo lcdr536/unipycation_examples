@@ -35,10 +35,17 @@ class Connect4(object):
         self.new_game_button = tk.Button(self.top, text="New Game", command=self._new)
         self.new_game_button.grid(column=COLS, row=0)
 
+        self.status_text = tk.Label(self.top, text="---")
+        self.status_text.grid(column=COLS, row=1)
+
+    def _set_status_text(self, text):
+        self.status_text["text"] = text
+
     def _end(self, winner_colour):
         for i in self.insert_buttons:
             i["state"] = tk.DISABLED
         self.new_game_button["background"] = winner_colour
+        self._set_status_text("%s wins" % winner_colour)
 
     def _new(self):
         def_bg = self.top.cget('bg')
@@ -49,8 +56,11 @@ class Connect4(object):
                 b["background"] = def_bg
 
         self.new_game_button["background"] = def_bg
+        self._set_status_text("Your move")
 
-    def play(self): self.top.mainloop()
+    def play(self):
+        self._new()
+        self.top.mainloop()
 
     def _collect_token_coords(self, colour):
         """ makes a prolog list of coords of a given colour """
@@ -87,7 +97,9 @@ class Connect4(object):
 
     def _ai_move(self):
         """ Let the AI take their turn. Uses minimax """
-        print("AI here goes")
+
+        self._set_status_text("AI thinking...")
+        self.top.update_idletasks() # redraw so we can see player's move
 
         # encode the current board and whose move (yellow for ai)
         (reds, yellows) = self._counters_to_terms()
@@ -97,6 +109,7 @@ class Connect4(object):
         print("New board cost: %s" % val)
         print(goodpos)
         self._update_from_pos(goodpos)
+        self._set_status_text("Your move")
 
     def _insert(self, colno):
         for but in reversed(self.cols[colno]):
@@ -106,7 +119,6 @@ class Connect4(object):
                 if self._check_win(): return # did the player win?
 
                 # AI takes it's turn now
-                self.top.update_idletasks() # redraw so we can see player's move
                 self._ai_move()
                 self._check_win()
                 return
