@@ -9,8 +9,8 @@ def token_click_closure(c4, colno):
 
 def tokengen():
     while True:
-        yield "yellow"
         yield "red"
+        yield "yellow"
 
 class Connect4(object):
     def __init__(self):
