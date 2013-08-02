@@ -9,8 +9,13 @@
 
 alphabeta( Pos, Alpha, Beta, GoodPos, Val)  :-
   moves( Pos, PosList), !,
-  boundedbest( PosList, Alpha, Beta, GoodPos, Val);
-  staticval( Pos, Val).                              % Static value of Pos 
+  alphabetamoves(PosList, Pos, Alpha, Beta, GoodPos, Val).
+
+alphabetamoves([], Pos, _, _, _, Val)  :-
+  staticval(Pos, Val), !.                              % Static value of Pos 
+
+alphabetamoves(PosList, _, Alpha, Beta, GoodPos, Val)  :-
+  boundedbest( PosList, Alpha, Beta, GoodPos, Val).
 
 boundedbest( [Pos | PosList], Alpha, Beta, GoodPos, GoodVal)  :-
   alphabeta( Pos, Alpha, Beta, _, Val),
