@@ -1,5 +1,5 @@
 % Figure 22.5  An implementation of the alpha-beta algorithm.
-% From the book:
+% Based upon code from the book:
 % Prolog Programming for Artificial Intelligence
 % http://www.iro.umontreal.ca/~nie/IFT3335/Bratko/fig22_5.pl
 
