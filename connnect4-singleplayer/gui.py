@@ -8,7 +8,7 @@ def token_click_closure(c4, colno):
     return lambda : c4._insert(colno)
 
 class Connect4(object):
-    UI_DEPTH = 4 # lookahead for minimax
+    UI_DEPTH = 5 # lookahead for minimax
 
     def __init__(self):
         self.top = tk.Tk()
