@@ -121,7 +121,7 @@ test(GoodPos, Val) :-
 	Reds = [c(0, 0), c(0, 1)],
 	Yellows = [c(1, 0), c(1, 1), c(2, 0)],
 	Pos = pos(Reds, Yellows, red),
-	alphabeta(Pos, -99999, 99999, GoodPos, Val).
+	alphabeta(Pos, -99999, 99999, GoodPos, Val, 10).
 	%moves(Pos, Moves),
 	%print_moves(Moves).
 	%write(GoodPos), nl,
