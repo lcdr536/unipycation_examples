@@ -7,10 +7,10 @@ COLS = 7
 def token_click_closure(c4, colno):
     return lambda : c4._insert(colno)
 
-def tokengen():
-    while True:
-        yield "red"
-        yield "yellow"
+#def tokengen():
+#    while True:
+#        yield "red"
+#        yield "yellow"
 
 class Connect4(object):
     def __init__(self):
@@ -62,25 +62,48 @@ class Connect4(object):
         return [ (x, y) for x in range(COLS) for y in range(ROWS)
                 if self.cols[x][y]["background"] == colour ]
 
+    def _ai_move(self):
+        """ Let the AI take their turn. Uses minimax """
+
+        # encode the current board and whose move (yellow for ai)
+        (reds, yellows) = self._counters_to_terms()
+        pos = self.pl_engine.terms.pos(reds, yellows, "yellow")
+
+        # XXX call prolog
+        pass
+
     def _insert(self, colno):
         for but in reversed(self.cols[colno]):
             if but["background"] not in ["red", "yellow"]:
-                but["background"] = self.tokgen.next()
+                but["background"] = "red" # player is always red
+
+                if self._check_win(): return # did the player win?
+
+                # AI takes it's turn now
+                self._ai_move()
                 self._check_win()
                 return
         print("column full, try again")
 
-    def _check_win(self):
+    def _counters_to_terms(self):
+        """ convert the board to prolog terms """
         reds = [ self.pl_engine.terms.c(x, y) for \
                 (x, y) in self._collect_token_coords("red") ]
         yellows = [ self.pl_engine.terms.c(x, y) for \
                 (x, y) in self._collect_token_coords("yellow") ]
+        return (reds, yellows)
+
+    def _check_win(self):
+        (reds, yellows) = self._counters_to_terms()
 
         res = self.pl_engine.db.has_won(reds, yellows, None)
         if res is not None:
             (winner, ) = res
             print("%s wins" % winner)
             self._end(winner)
+            return True
+
+        return False # no win
 
 if __name__ == "__main__":
     g = Connect4()

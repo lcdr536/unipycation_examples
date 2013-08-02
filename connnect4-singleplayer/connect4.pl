@@ -88,6 +88,8 @@ insert_token(pos(Reds, Yellows, WhoseMove), Col, Move) :-
 	)).
 
 % Find all possible subsequent game states
+moves(pos(Reds, Yellows, _), []) :- % if someone won, dont collect moves
+	has_won(Reds, Yellows, _), !.
 moves(Pos, Moves) :-
 	board_width(Width), Col is Width - 1,
 	findall(Move, moves(Pos, Move, Col), Moves).
