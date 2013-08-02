@@ -8,7 +8,7 @@
 :- module(minimax, [alphabeta/6]).
 
 alphabeta( Pos, Alpha, Beta, GoodPos, Val, Depth)  :-
-  :oves( Pos, PosList), !,
+  moves( Pos, PosList), !,
   Depth0 is Depth - 1,
   alphabetamoves(PosList, Pos, Alpha, Beta, GoodPos, Val, Depth0).
 
