@@ -113,6 +113,7 @@ class Connect4(object):
                 if self._check_win(): return # did the player win?
 
                 # AI takes it's turn now
+                self.top.update_idletasks() # redraw so we can see player's move
                 self._ai_move()
                 self._check_win()
                 return
