@@ -67,8 +67,21 @@ class Connect4(object):
     def _update_from_pos_one_colour(self, term_list, colour):
         assert colour in ["red", "yellow"]
 
-        print("The list is of length %d: %s" % (len(term_list), term_list))
-        for c in term_list:
+        # XXX work around unipycation "bug"
+        # Lists inside terms are not currently unwrapped
+        # Iterative to avoid slicing
+        def unwrap_prolog_list(cons):
+            ret = []
+            while cons != "[]":
+                assert isinstance(cons, uni.Term)
+                assert cons.name == "."
+                ret.append(cons.args[0])
+                cons = cons[1]
+            return ret
+
+        pylist = unwrap_prolog_list(term_list)
+        print("The list is of length %d: %s" % (len(pylist), pylist))
+        for c in pylist:
             if c == "[]": continue # XXX bug
             assert c.name == "c"
             (x, y) = (c.args[0], c.args[1])
@@ -87,7 +100,7 @@ class Connect4(object):
         (reds, yellows) = self._counters_to_terms()
         Pos = self.pl_engine.terms.pos(reds, yellows, "yellow")
 
-        sol = (goodpos, val) = self.pl_engine.db.alphabeta(Pos, -99999, 99999, None, None, Connect4.UI_DEPTH)
+        (goodpos, val) = self.pl_engine.db.alphabeta(Pos, -99999, 99999, None, None, Connect4.UI_DEPTH)
         print("New board cost: %s" % val)
         print(goodpos)
         self._update_from_pos(goodpos)
