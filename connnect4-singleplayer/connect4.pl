@@ -8,15 +8,11 @@ direction(v(0, 1), vertical).
 direction(v(1, 1), lrdiagonal).
 direction(v(-1, 1), rldiagnoal).
 
-member1(E, [E | _]).
-member1(E, [_ | T]) :-
-	member1(E, T).
-	
 search_vector(_, _, _, Required, Required).
 search_vector(COINS, c(X, Y), v(XD, YD), Required, CT) :-
 	board_width(W), -1 < X, X < W,
 	board_height(H), -1 < Y, Y < H,
-	member1(c(X, Y), COINS),
+	member(c(X, Y), COINS),
 	NEXT_CT is CT + 1,
 	NEXT_X is X + XD,
 	NEXT_Y is Y + YD,
@@ -25,14 +21,13 @@ search_vector(COINS, c(X, Y), v(XD, YD), Required, CT) :-
 find_consecutive(COINS, Required, C) :-
 	direction(VEC, _),
 	search_vector(COINS, C, VEC, Required, 0).
-	%format("~p win at ~p~n", [DESCR, C]).
 
 has_won(REDS, _, red) :-
-	member1(C, REDS),
+	member(C, REDS),
 	find_consecutive(REDS, 4, C), !.
 
 has_won(_, YELLOWS, yellow) :-
-	member1(C, YELLOWS),
+	member(C, YELLOWS),
 	find_consecutive(YELLOWS, 4, C), !.
 
 % Test case
@@ -56,7 +51,6 @@ staticval(pos(RedCounters, YellowCounters, _), WinVal) :-
 staticval(pos(RedCounters, YellowCounters, _), Val) :-
 	staticval_player(RedCounters, RedCounters, ValRed),
 	staticval_player(YellowCounters, YellowCounters, ValYellow),
-	%format("Red ~k vs Yellow ~k~n", [ValRed, ValYellow]),
 	Val is ValYellow - ValRed.
 
 % Collects the score of a single player's counters.
@@ -108,15 +102,6 @@ moves(pos(Reds, Yellows, WhoseMove), Move, Col) :-
 	Col > -1, NextCol is Col - 1,
 	moves(pos(Reds, Yellows, WhoseMove), Move, NextCol). % search next col
 
-% Just for debugging
-print_moves([]).
-print_moves([Move | Others]) :-
-	staticval(Move, Val),
-	%format("~p = ~p~n", [Move, Val]),
-	write(Move),nl,
-	write(Val),nl,
-	print_moves(Others).
-
 min_to_move(pos(_, _, red)).
 max_to_move(pos(_, _, yellow)).
 	
@@ -126,7 +111,3 @@ test(GoodPos, Val) :-
 	Yellows = [],
 	Pos = pos(Reds, Yellows, red),
 	alphabeta(Pos, -99999, 99999, GoodPos, Val, 5).
-	%moves(Pos, Moves),
-	%print_moves(Moves).
-	%write(GoodPos), nl,
-	%write(Val), nl.
