@@ -9,33 +9,33 @@ direction(v(1, 1), lrdiagonal).
 direction(v(-1, 1), rldiagnoal).
 
 search_vector(_, _, _, Required, Required).
-search_vector(COINS, c(X, Y), v(XD, YD), Required, CT) :-
+search_vector(Coins, c(X, Y), v(Xd, Yd), Required, Ct) :-
 	board_width(W), -1 < X, X < W,
 	board_height(H), -1 < Y, Y < H,
-	member(c(X, Y), COINS),
-	NEXT_CT is CT + 1,
-	NEXT_X is X + XD,
-	NEXT_Y is Y + YD,
-	search_vector(COINS, c(NEXT_X, NEXT_Y), v(XD, YD), Required, NEXT_CT).
+	member(c(X, Y), Coins),
+	NextCt is Ct + 1,
+	NextX is X + Xd,
+	NextY is Y + Yd,
+	search_vector(Coins, c(NextX, NextY), v(Xd, Yd), Required, NextCt).
 
-find_consecutive(COINS, Required, C) :-
-	direction(VEC, _),
-	search_vector(COINS, C, VEC, Required, 0).
+find_consecutive(Coins, Required, C) :-
+	direction(Vec, _),
+	search_vector(Coins, C, Vec, Required, 0).
 
-has_won(REDS, _, red) :-
-	member(C, REDS),
-	find_consecutive(REDS, 4, C), !.
+has_won(Reds, _, red) :-
+	member(C, Reds),
+	find_consecutive(Reds, 4, C), !.
 
-has_won(_, YELLOWS, yellow) :-
-	member(C, YELLOWS),
-	find_consecutive(YELLOWS, 4, C), !.
+has_won(_, Yellows, yellow) :-
+	member(C, Yellows),
+	find_consecutive(Yellows, 4, C), !.
 
 % Test case
 % Note the validity of the board is not checked.
-main(WINNER):-
-	REDS = [ c(1, 1), c(2, 2), c(3, 3), c(4, 4) ],
-	YELLOWS = [ c(3, 4), c(4, 4), c(5, 4), c(6, 4)],
-	has_won(REDS, YELLOWS, WINNER).
+main(Winner):-
+	Reds = [ c(1, 1), c(2, 2), c(3, 3), c(4, 4) ],
+	Yellows = [ c(3, 4), c(4, 4), c(5, 4), c(6, 4)],
+	has_won(Reds, Yellows, Winner).
 
 % ---/// Stuff for the minimax solver ///---
 
