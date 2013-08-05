@@ -50,7 +50,8 @@ mandel_(N, Cr, Ci, Zr, Zi) :-
 	mandel_(N1, Cr, Ci, Zr1, Zi1).
 
 output(Byte) :-
-	put_byte(Byte),
+	%put_byte(Byte),
+	put_code(Byte),
 	nb_setval(bitnumber, 0), nb_setval(byteout, 0).
 
 %argument_value(Nth, N) :-
