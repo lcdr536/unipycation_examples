@@ -11,6 +11,10 @@
 % Improved by Bart Demoen
 %
 % ----------------------------------------------------------------------
+
+sqrt(In, Out) :-
+	Out is In ** 0.5.
+
 main :-
 	cmdlNumArg(1, N),
 	main(N).
@@ -61,7 +65,8 @@ energy_dist([],_,_,_,_,C,C).
 energy_dist([Body|Bodies],X,Y,Z,Mass,C,NC) :-
 	Body = body(XT, YT, ZT, _, _, _, MassT),
 	DX is X - XT, DY is Y - YT, DZ is Z - ZT,
-	DISTANCE is sqrt(DX * DX + DY * DY + DZ * DZ),
+	%DISTANCE is sqrt(DX * DX + DY * DY + DZ * DZ),
+	sqrt(DX * DX + DY * DY + DZ * DZ, DISTANCE),
 	C1 is C - (Mass * MassT) / DISTANCE,
 	energy_dist(Bodies,X,Y,Z,Mass,C1,NC).
 
@@ -94,7 +99,8 @@ treatallpairs1([ET|RET],E,DT,NewB,NewBs) :-
 	ET = body(XT, YT, ZT, VXT, VYT, VZT, MassT),
 
 	DX is X - XT, DY is Y - YT, DZ is Z - ZT,
-	DISTANCE is sqrt(DX * DX + DY * DY + DZ * DZ),
+	%DISTANCE is sqrt(DX * DX + DY * DY + DZ * DZ),
+	sqrt(DX * DX + DY * DY + DZ * DZ, DISTANCE),
 	Mag is DT / (DISTANCE * DISTANCE * DISTANCE),
 
 	VX1 is VX - DX * MassT * Mag,
