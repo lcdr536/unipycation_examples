@@ -36,7 +36,7 @@ class Connect4(object):
                 col.append(b)
             self.cols.append(col)
 
-        self.new_game_button = tk.Button(self.top, text="New Game", command=self._new)
+        self.new_game_button = tk.Button(self.top, text="Start New Game", command=self._new)
         self.new_game_button.grid(column=COLS, row=0)
 
         self.status_text = tk.Label(self.top, text="---")
@@ -72,11 +72,11 @@ class Connect4(object):
         while True:
             self.turn = not self.turn # flip turn
             if self.ai_players[self.turn]:
-                self._set_status_text("AI thinking")
+                self._set_status_text("%s AI thinking" % (self._player_colour().title()))
                 self._ai_turn()
                 if self._check_win(): break # did the AI player win?
             else:
-                self._set_status_text("Human move")
+                self._set_status_text("%s human move" % (self._player_colour().title()))
                 break # allow top loop to deal with human turn
 
     def play(self):
