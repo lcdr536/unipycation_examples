@@ -5,10 +5,10 @@
 % Contributed by Anthony Borla
 % ----------------------------------------------------------------------
 
-main :-
-  cmdlNumArg(1, N),
-
-  main(N).
+%main :-
+%  cmdlNumArg(1, N),
+%
+%  main(N).
 
 main(N):-
   MIN_DEPTH is 4, set_limits(N, MIN_DEPTH, MAX_DEPTH, STRETCH_DEPTH),
@@ -16,14 +16,22 @@ main(N):-
   bottom_up_tree(0, STRETCH_DEPTH, ST),
 
   check_tree(ST, ITS),
-  format('stretch tree of depth ~w\t check: ~w~n', [STRETCH_DEPTH, ITS]),
+  %format('stretch tree of depth ~w\t check: ~w~n', [STRETCH_DEPTH, ITS]),
+  write(stretch_tree_of_depth), nl,
+  write(STRETCH_DEPTH), nl,
+  write(check), nl,
+  write(ITS), nl,
 
   bottom_up_tree(0, MAX_DEPTH, LLT),
 
   descend_trees(MIN_DEPTH, MIN_DEPTH, MAX_DEPTH),
 
   check_tree(LLT, ITL),
-  format('long lived tree of depth ~w\t check: ~w~n', [MAX_DEPTH, ITL]).
+  %format('long lived tree of depth ~w\t check: ~w~n', [MAX_DEPTH, ITL]).
+  write(long_lived_tree_of_depth), nl,
+  write(MAX_DEPTH), nl,
+  write(check), nl,
+  write(ITL), nl,
 
 % ------------------------------- %
 
@@ -38,7 +46,13 @@ descend_trees(CurrentDepth, MinDepth, MaxDepth) :-
   (CurrentDepth =< MaxDepth ->
     N is integer(2 ** (MaxDepth - CurrentDepth + MinDepth)), Iterations is 2 * N,
     sum_trees(N, CurrentDepth, 0, Sum),
-    format('~w\t trees of depth ~w\t check: ~w~n', [Iterations, CurrentDepth, Sum]),
+    %format('~w\t trees of depth ~w\t check: ~w~n', [Iterations, CurrentDepth, Sum]),
+    write(Iterations), nl,
+    write(trees_of_depth), nl,
+    write(CurrentDepth), nl,
+    write(check), nl,
+    write(Sum), nl,
+
     NewDepth is CurrentDepth + 2, !, descend_trees(NewDepth, MinDepth, MaxDepth)
   ;
     true).
@@ -84,15 +98,15 @@ check_tree(tree(Item, Left, Right), ItemNew) :-
 %%%z cmdlNumArg(Nth, N) :-
 %%%z   argument_value(Nth, Arg), catch(atom_number(Arg, N), _, fail) ; halt(1).
 
-argument_value(N, Arg) :-
-  get_main_args(Cmdline), 
-  append(_, [--|UserArgs], Cmdline),
-  Nth is N - 1, nth0(Nth, UserArgs, Arg).
+%argument_value(N, Arg) :-
+%  get_main_args(Cmdline), 
+%  append(_, [--|UserArgs], Cmdline),
+%  Nth is N - 1, nth0(Nth, UserArgs, Arg).
 
-cmdlNumArg(Nth, N) :-
-  argument_value(Nth, Arg), 
-  catch(atom_number(Arg, N), _, fail) ; halt(1).
+%cmdlNumArg(Nth, N) :-
+%  argument_value(Nth, Arg), 
+%  catch(atom_number(Arg, N), _, fail) ; halt(1).
 
-atom_number(Arg,N):-
-   atom_codes(Arg,Codes),
-   number_codes(N,Codes).
+%atom_number(Arg,N):-
+%   atom_codes(Arg,Codes),
+%   number_codes(N,Codes).
