@@ -24,15 +24,21 @@ pidigits_(K, Z, N, Row, Col) :-
     (IsSafe ->
       prod(Z, Y, RL), N1 is N - 1,
       (Col =:= 10 ->
-        Cf is 1, Rf is 10 + Row, format('\t:~w\n~w', [Rf, Y])
+        %Cf is 1, Rf is 10 + Row, format('\t:~w\n~w', [Rf, Y])
+        Cf is 1, Rf is 10 + Row, write('\t:'), write(Rf), nl, write(Y)
       ;
-        Cf is 1 + Col, Rf is Row, format('~w', [Y])),
-      !, pidigits_(K, RL, N1, Rf, Cf)
+        %Cf is 1 + Col, Rf is Row, format('~w', [Y])),
+	Cf is 1 + Col, Rf is Row, write(Y)),
+	!, pidigits_(K, RL, N1, Rf, Cf)
     ;
       cons(Z, K, RL), K1 is K + 1,
       !, pidigits_(K1, RL, N, Row, Col))
   ;
-    NS is 10 - Col, tab(NS), RC is Row + Col, format('\t:~w\n', [RC])).
+    %NS is 10 - Col, tab(NS), RC is Row + Col, format('\t:~w\n', [RC])).
+    NS is 10 - Col, tab(NS), RC is Row + Col, write('\t:'), write(RC), nl).
+
+tab(0).
+tab(X) :- write(' '), NextX is X - 1, tab(NextX).
 
 % ------------- %
 
