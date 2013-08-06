@@ -17,20 +17,14 @@ main(N) :-
 
   check_tree(ST, ITS),
   %format('stretch tree of depth ~w\t check: ~w~n', [STRETCH_DEPTH, ITS]),
-  write(stretch_tree_of_depth), nl,
-  write(STRETCH_DEPTH), nl,
-  write(check), nl,
-  write(ITS), nl,
+  write('stretch tree of depth '), write(STRETCH_DEPTH), write('\t check'), write(ITS), nl,
 
   bottom_up_tree(0, MAX_DEPTH, LLT),
   descend_trees(MIN_DEPTH, MIN_DEPTH, MAX_DEPTH),
 
   check_tree(LLT, ITL),
   %format('long lived tree of depth ~w\t check: ~w~n', [MAX_DEPTH, ITL]).
-  write(long_lived_tree_of_depth), nl,
-  write(MAX_DEPTH), nl,
-  write(check), nl,
-  write(ITL), nl.
+  write('long lived tree of depth '), write(MAX_DEPTH), write('\t check: '), write(ITL), nl.
 
 % ------------------------------- %
 
@@ -47,11 +41,7 @@ descend_trees(CurrentDepth, MinDepth, MaxDepth) :-
     N is floor(2 ** (MaxDepth - CurrentDepth + MinDepth)), Iterations is 2 * N,
     sum_trees(N, CurrentDepth, 0, Sum),
     %format('~w\t trees of depth ~w\t check: ~w~n', [Iterations, CurrentDepth, Sum]),
-    write(Iterations), nl,
-    write(trees_of_depth), nl,
-    write(CurrentDepth), nl,
-    write(check), nl,
-    write(Sum), nl,
+    write(Iterations), write('\t trees of depth '), write(CurrentDepth), write('\t check: '), write(Sum), nl,
 
     NewDepth is CurrentDepth + 2, !, descend_trees(NewDepth, MinDepth, MaxDepth)
   ;
