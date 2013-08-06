@@ -10,7 +10,7 @@
 %
 %  main(N).
 
-main(N):-
+main(N) :-
   MIN_DEPTH is 4, set_limits(N, MIN_DEPTH, MAX_DEPTH, STRETCH_DEPTH),
 
   bottom_up_tree(0, STRETCH_DEPTH, ST),
@@ -23,7 +23,6 @@ main(N):-
   write(ITS), nl,
 
   bottom_up_tree(0, MAX_DEPTH, LLT),
-
   descend_trees(MIN_DEPTH, MIN_DEPTH, MAX_DEPTH),
 
   check_tree(LLT, ITL),
@@ -31,7 +30,7 @@ main(N):-
   write(long_lived_tree_of_depth), nl,
   write(MAX_DEPTH), nl,
   write(check), nl,
-  write(ITL), nl,
+  write(ITL), nl.
 
 % ------------------------------- %
 
@@ -44,7 +43,8 @@ set_limits(N, MinDepth, MaxDepth, StretchDepth) :-
 
 descend_trees(CurrentDepth, MinDepth, MaxDepth) :-
   (CurrentDepth =< MaxDepth ->
-    N is integer(2 ** (MaxDepth - CurrentDepth + MinDepth)), Iterations is 2 * N,
+    %N is integer(2 ** (MaxDepth - CurrentDepth + MinDepth)), Iterations is 2 * N,
+    N is floor(2 ** (MaxDepth - CurrentDepth + MinDepth)), Iterations is 2 * N,
     sum_trees(N, CurrentDepth, 0, Sum),
     %format('~w\t trees of depth ~w\t check: ~w~n', [Iterations, CurrentDepth, Sum]),
     write(Iterations), nl,
