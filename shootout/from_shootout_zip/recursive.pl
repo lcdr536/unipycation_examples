@@ -21,7 +21,8 @@ main(A):-
   write('Ack(3,'), write(A), write('): '),
   ack(3, A, Val),!,
   write(Val), nl,
-  write('Fib('), write(C), write('): '), fib_float(C,V), format('~1f', V), nl, !,
+  %write('Fib('), write(C), write('): '), fib_float(C,V), format('~1f', V), nl, !,
+  write('Fib('), write(C), write('): '), fib_float(C,V), write(V), nl, !,
   X is 3*B,
   Y is 2*B,
   Z is B,
@@ -31,7 +32,8 @@ main(A):-
   write('Fib(3): '), fib(3,V1), write(V1), nl,
   write('Tak(3.0,2.0,1.0): '),
   tak(3.0,2.0,1.0,FR),
-  format('~1f', FR), nl.
+  %format('~1f', FR), nl.
+  write(FR), nl.
 
 % ------------------------------- %
 
