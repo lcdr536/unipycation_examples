@@ -8,7 +8,7 @@ def token_click_closure(c4, colno):
     return lambda : c4._insert(colno)
 
 class Connect4(object):
-    UI_DEPTH = 2 # lookahead for minimax
+    UI_DEPTH = 5 # lookahead for minimax
 
     def __init__(self, p1_is_ai, p2_is_ai):
         self.top = tk.Tk()
@@ -71,20 +71,15 @@ class Connect4(object):
         # Not pretty, but works...
         while True:
             self.turn = not self.turn # flip turn
-            print("TURN: %s" % self.turn)
             if self.ai_players[self.turn]:
-                print("AI MOVE")
                 self._set_status_text("AI thinking")
                 self._ai_turn()
                 if self._check_win(): break # did the AI player win?
             else:
-                print("HUMAN MOVE")
                 self._set_status_text("Human move")
                 break # allow top loop to deal with human turn
-        print("OUTSIDE!!!!!!!!!!!!!!!!!")
 
     def play(self):
-        #self._new()
         self._end()
         self.top.mainloop()
 
@@ -125,9 +120,7 @@ class Connect4(object):
 
     def _ai_turn(self):
         """ Let the AI take their turn. Uses minimax """
-        print("UAIUAIUAIAIAIA")
 
-        #self._set_status_text("AI thinking...")
         self.top.update_idletasks() # redraw so we can see player's move
 
         # encode the current board and whose move (yellow for ai)
@@ -137,12 +130,8 @@ class Connect4(object):
         (goodpos, val) = self.pl_engine.db.alphabeta(pos, -99999, 99999, None, None, Connect4.UI_DEPTH)
         self._update_from_pos(goodpos)
 
-        #if self._check_win(): return # did the AI player win?
-        #self._turn() # otherwise next turn
-
     def _insert(self, colno):
         """ Called when a human inserts a token """
-        print("_INSERT!")
         for but in reversed(self.cols[colno]):
             if but["background"] not in ["red", "yellow"]:
                 but["background"] = self._player_colour()
@@ -150,7 +139,6 @@ class Connect4(object):
                 if self._check_win(): return # did the player win?
                 self._turn() # next turn
                 break
-
         print("column full, try again")
 
     def _counters_to_terms(self):
