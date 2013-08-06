@@ -5,9 +5,9 @@
 % Contributed by Anthony Borla
 % ----------------------------------------------------------------------
 
-main :-
-  cmdlNumArg(1, N),
-  main(N).
+%main :-
+%  cmdlNumArg(1, N),
+%  main(N).
 
 main(N):-
   init_fasta,
@@ -136,15 +136,15 @@ string_to_list(Atom,Codes):-atom_codes(Atom,Codes).
 %%%z cmdlNumArg(Nth, N) :-
 %%%z   argument_value(Nth, Arg), catch(atom_number(Arg, N), _, fail) ; halt(1).
 
-argument_value(N, Arg) :-
-  get_main_args(Cmdline), 
-  append(_, [--|UserArgs], Cmdline),
-  Nth is N - 1, nth0(Nth, UserArgs, Arg).
+%argument_value(N, Arg) :-
+%  get_main_args(Cmdline), 
+%  append(_, [--|UserArgs], Cmdline),
+%  Nth is N - 1, nth0(Nth, UserArgs, Arg).
 
-cmdlNumArg(Nth, N) :-
-  argument_value(Nth, Arg), 
-  catch(atom_number(Arg, N), _, fail) ; halt(1).
+%cmdlNumArg(Nth, N) :-
+%  argument_value(Nth, Arg), 
+%  catch(atom_number(Arg, N), _, fail) ; halt(1).
 
-atom_number(Arg,N):-
-   atom_codes(Arg,Codes),
-   number_codes(N,Codes).
+%atom_number(Arg,N):-
+%   atom_codes(Arg,Codes),
+%   number_codes(N,Codes).
