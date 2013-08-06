@@ -139,7 +139,8 @@ class Connect4(object):
                 if self._check_win(): return # did the player win?
                 self._turn() # next turn
                 break
-        print("column full, try again")
+        else:
+            print("column full, try again")
 
     def _counters_to_terms(self):
         """ convert the board to prolog terms """
