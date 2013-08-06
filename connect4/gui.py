@@ -5,7 +5,7 @@ ROWS = 6
 COLS = 7
 
 def token_click_closure(c4, colno):
-    return lambda : c4._insert(colno)
+    return lambda : c4._player_turn(colno)
 
 class Connect4(object):
     UI_DEPTH = 5 # lookahead for minimax
@@ -130,7 +130,7 @@ class Connect4(object):
         (goodpos, val) = self.pl_engine.db.alphabeta(pos, -99999, 99999, None, None, Connect4.UI_DEPTH)
         self._update_from_pos(goodpos)
 
-    def _insert(self, colno):
+    def _player_turn(self, colno):
         """ Called when a human inserts a token """
         for but in reversed(self.cols[colno]):
             if but["background"] not in ["red", "yellow"]:
