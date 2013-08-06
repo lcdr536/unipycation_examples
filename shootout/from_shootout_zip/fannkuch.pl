@@ -13,7 +13,8 @@ main(N):-
   init_fannkuch,
 
   f_permutations(N, MaxFlips),
-  format('Pfannkuchen(~d) = ~d~n', [N, MaxFlips]),
+  %format('Pfannkuchen(~d) = ~d~n', [N, MaxFlips]),
+  write(pfannkuchen_of_), write(N), nl, write(MaxFlips), nl,
 
   drop_fannkuch.
 
