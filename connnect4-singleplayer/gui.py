@@ -1,5 +1,5 @@
 import Tkinter as tk
-import uni
+import uni, sys
 
 ROWS = 6
 COLS = 7
@@ -8,14 +8,18 @@ def token_click_closure(c4, colno):
     return lambda : c4._insert(colno)
 
 class Connect4(object):
-    UI_DEPTH = 6 # lookahead for minimax
+    UI_DEPTH = 2 # lookahead for minimax
 
-    def __init__(self):
+    def __init__(self, p1_is_ai, p2_is_ai):
         self.top = tk.Tk()
         self.top.title("Unipycation: Connect 4 GUI (Python)")
 
         with open("connect4.pl", "r") as f: pdb = f.read()
         self.pl_engine = uni.Engine(pdb)
+
+        # controls cpu/human players
+        self.turn = None # True for p1, False for p2
+        self.ai_players = { True : p1_is_ai, False : p2_is_ai }
 
         self.cols = []
         self.insert_buttons = []
@@ -41,13 +45,16 @@ class Connect4(object):
     def _set_status_text(self, text):
         self.status_text["text"] = text
 
-    def _end(self, winner_colour):
+    def _end(self, winner_colour=None):
         for i in self.insert_buttons:
             i["state"] = tk.DISABLED
-        self.new_game_button["background"] = winner_colour
-        self._set_status_text("%s wins" % winner_colour)
+
+        if winner_colour is not None:
+            self.new_game_button["background"] = winner_colour
+            self._set_status_text("%s wins" % winner_colour)
 
     def _new(self):
+        self.turn = False # first call to _turn will flip to True
         def_bg = self.top.cget('bg')
         for i in self.insert_buttons: i["state"] = tk.NORMAL
 
@@ -58,8 +65,27 @@ class Connect4(object):
         self.new_game_button["background"] = def_bg
         self._set_status_text("Your move")
 
+        self._turn()
+
+    def _turn(self):
+        # Not pretty, but works...
+        while True:
+            self.turn = not self.turn # flip turn
+            print("TURN: %s" % self.turn)
+            if self.ai_players[self.turn]:
+                print("AI MOVE")
+                self._set_status_text("AI thinking")
+                self._ai_turn()
+                if self._check_win(): break # did the AI player win?
+            else:
+                print("HUMAN MOVE")
+                self._set_status_text("Human move")
+                break # allow top loop to deal with human turn
+        print("OUTSIDE!!!!!!!!!!!!!!!!!")
+
     def play(self):
-        self._new()
+        #self._new()
+        self._end()
         self.top.mainloop()
 
     def _collect_token_coords(self, colour):
@@ -84,7 +110,6 @@ class Connect4(object):
             return ret
 
         pylist = unwrap_prolog_list(term_list)
-        print("The list is of length %d: %s" % (len(pylist), pylist))
         for c in pylist:
             assert c.name == "c"
             (x, y) = (c.args[0], c.args[1])
@@ -95,33 +120,37 @@ class Connect4(object):
         self._update_from_pos_one_colour(pos.args[0], "red")
         self._update_from_pos_one_colour(pos.args[1], "yellow")
 
-    def _ai_move(self):
-        """ Let the AI take their turn. Uses minimax """
+    def _player_colour(self):
+        return "red" if self.turn else "yellow"
 
-        self._set_status_text("AI thinking...")
+    def _ai_turn(self):
+        """ Let the AI take their turn. Uses minimax """
+        print("UAIUAIUAIAIAIA")
+
+        #self._set_status_text("AI thinking...")
         self.top.update_idletasks() # redraw so we can see player's move
 
         # encode the current board and whose move (yellow for ai)
         (reds, yellows) = self._counters_to_terms()
-        Pos = self.pl_engine.terms.pos(reds, yellows, "yellow")
+        pos = self.pl_engine.terms.pos(reds, yellows, self._player_colour())
 
-        (goodpos, val) = self.pl_engine.db.alphabeta(Pos, -99999, 99999, None, None, Connect4.UI_DEPTH)
-        print("New board cost: %s" % val)
-        print(goodpos)
+        (goodpos, val) = self.pl_engine.db.alphabeta(pos, -99999, 99999, None, None, Connect4.UI_DEPTH)
         self._update_from_pos(goodpos)
-        self._set_status_text("Your move")
+
+        #if self._check_win(): return # did the AI player win?
+        #self._turn() # otherwise next turn
 
     def _insert(self, colno):
+        """ Called when a human inserts a token """
+        print("_INSERT!")
         for but in reversed(self.cols[colno]):
             if but["background"] not in ["red", "yellow"]:
-                but["background"] = "red" # player is always red
+                but["background"] = self._player_colour()
 
                 if self._check_win(): return # did the player win?
+                self._turn() # next turn
+                break
 
-                # AI takes it's turn now
-                self._ai_move()
-                self._check_win()
-                return
         print("column full, try again")
 
     def _counters_to_terms(self):
@@ -145,5 +174,21 @@ class Connect4(object):
         return False # no win
 
 if __name__ == "__main__":
-    g = Connect4()
+
+    if len(sys.argv) != 2:
+        print("usage: gui.py num_players")
+        sys.exit(1)
+
+    n = int(sys.argv[1])
+
+    if n == 0:
+        g = Connect4(True, True)
+    elif n == 1:
+        g = Connect4(False, True)
+    elif n == 2:
+        g = Connect4(False, False)
+    else:
+        print("0/1/2 players")
+        sys.exit(1)
+
     g.play()
