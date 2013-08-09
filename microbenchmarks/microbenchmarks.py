@@ -8,6 +8,10 @@ countdown(X) :- X > 0, X0 is X - 1, countdown(X0).
 countdown_n_times(0, _).
 countdown_n_times(N, X) :-
     N > 0, countdown(X), N0 is N - 1, countdown_n_times(N0, X).
+countdown_n_times_python(0, _).
+countdown_n_times_python(N, X) :-
+    N > 0, python:countdown(X, _), N0 is N - 1, countdown_n_times_python(N0, X).
+
 sum_up_to_n(A, B) :- sum_up_to_n(A, 0, B).
 sum_up_to_n(0, Result, Result).
 sum_up_to_n(A, Accumulator, Result) :-
@@ -18,6 +22,10 @@ sum_up_to_n_many_times(0, _, _).
 sum_up_to_n_many_times(N, X, Expected) :-
     N > 0, sum_up_to_n(X, Res), Res == Expected, N0 is N - 1,
     sum_up_to_n_many_times(N0, X, Expected).
+sum_up_to_n_many_times_python(0, _, _).
+sum_up_to_n_many_times_python(N, X, Expected) :-
+    N > 0, python:sum_up_to_n(X, Res), Res == Expected, N0 is N - 1,
+    sum_up_to_n_many_times_python(N0, X, Expected).
 
 multiply_and_add(X, Y, Z, Res) :- Res is X + Y * Z.
 countdown_using_multiply_and_add(0).
@@ -42,6 +50,13 @@ call_gen1_n_times(Iterations, Count) :-
     Iterations0 is Iterations - 1,
     call_gen1_n_times(Iterations0, Count).
 
+call_gen1_n_times_python(0, _).
+call_gen1_n_times_python(Iterations, Count) :-
+    Iterations > 0,
+    ((python:gen1(Count, X), X == 1, fail); true),
+    Iterations0 is Iterations - 1,
+    call_gen1_n_times_python(Iterations0, Count).
+
 make_chain(A, B) :- make_chain(A, end, B).
 make_chain(X, In, Out) :-
     X >= 0,
@@ -55,10 +70,15 @@ consume_chain(pair(X, X2, Next), In, Out) :-
     In1 is In + X2 - X,
     consume_chain(Next, In1, Out).
 
-make_and_consume_chain_n_times(0, _).
-make_and_consume_chain_n_times(N, X) :-
-    N > 0, make_chain(X, Chain), consume_chain(Chain, 0, _),
-    N0 is N - 1, make_and_consume_chain_n_times(N0, X).
+make_and_consume_chain_n_times(0, _, _).
+make_and_consume_chain_n_times(N, X, Expected) :-
+    N > 0, make_chain(X, Chain), consume_chain(Chain, 0, Res), Res == Expected,
+    N0 is N - 1, make_and_consume_chain_n_times(N0, X, Expected).
+
+make_and_consume_chain_n_times_python(0, _, _).
+make_and_consume_chain_n_times_python(N, X, Expected) :-
+    N > 0, python:make_chain(X, Chain), consume_chain(Chain, 0, Res), Res == Expected,
+    N0 is N - 1, make_and_consume_chain_n_times_python(N0, X, Expected).
 
 make_list(A, B) :- make_list(A, [], B).
 make_list(X, In, Out) :-
@@ -72,10 +92,16 @@ consume_list([X | Next], In, Out) :-
     In1 is In + X,
     consume_list(Next, In1, Out).
 
-make_and_consume_list_n_times(0, _).
-make_and_consume_list_n_times(N, X) :-
-    N > 0, make_list(X, List), consume_list(List, 0, _),
-    N0 is N - 1, make_and_consume_list_n_times(N0, X).
+make_and_consume_list_n_times(0, _, _).
+make_and_consume_list_n_times(N, X, Expected) :-
+    N > 0, make_list(X, List), consume_list(List, 0, Result), Result == Expected,
+    N0 is N - 1, make_and_consume_list_n_times(N0, X, Expected).
+
+make_and_consume_list_n_times_python(0, _, _).
+make_and_consume_list_n_times_python(N, X, Expected) :-
+    N > 0, python:make_list(X, PyList), python:uni:build_prolog_list(PyList, List),
+    consume_list(List, 0, Result), Result == Expected,
+    N0 is N - 1, make_and_consume_list_n_times_python(N0, X, Expected).
 
 consume_instchain(Inst, X, X) :- Inst:is_terminator(1).
 consume_instchain(Inst, In, Out) :-
@@ -86,13 +112,28 @@ consume_instchain(Inst, In, Out) :-
     consume_instchain(Next, In1, Out).
 
 
-make_and_consume_instchain_n_times(0, _).
-make_and_consume_instchain_n_times(N, X) :-
-    N > 0, python:make_instchain(X, List), consume_instchain(List, 0, _),
-    N0 is N - 1, make_and_consume_instchain_n_times(N0, X).
-""")
+make_and_consume_instchain_n_times(0, _, _).
+make_and_consume_instchain_n_times(N, X, Expected) :-
+    N > 0, make_instchain(X, List), consume_instchain(List, 0, Res), Res == Expected,
+    N0 is N - 1, make_and_consume_instchain_n_times(N0, X, Expected).
 
-str = str
+make_and_consume_instchain_n_times_python(0, _, _).
+make_and_consume_instchain_n_times_python(N, X, Expected) :-
+    N > 0, python:make_instchain(X, List), consume_instchain(List, 0, Res), Res == Expected,
+    N0 is N - 1, make_and_consume_instchain_n_times_python(N0, X, Expected).
+
+make_instchain(A, B) :-
+    python:'Terminator'(T),
+    make_instchain(A, T, B).
+
+make_instchain(X, In, Out) :-
+    X >= 0,
+    X0 is X - 1,
+    python:'Chain'(X, In, Chain),
+    make_instchain(X0, Chain, Out).
+make_instchain(0, In, In).
+
+""")
 
 def multiply_and_add(a, b, c):
     return a + b * c
@@ -111,23 +152,15 @@ def sum_up_to_n(n):
 def make_chain(x):
     curr = "end"
     while x >= 0:
-        curr = ("pair", x, 2*x, curr)
+        curr = e.terms.pair(x, 2*x, curr)
         x -= 1
     return curr
 
 def consume_chain(chain):
     res = 0
     while chain != "end":
-        tag, val, val2, chain = chain
-        assert tag == "pair"
-        res += val2 - val
-    return res
-
-def consume_chain_prolog(chain):
-    res = 0
-    while chain != "end":
         assert chain.name == "pair"
-        val, val2, chain = chain[0], chain[1], chain[2]
+        val, val2, chain = chain
         res += val2 - val
     return res
 
@@ -165,7 +198,11 @@ def consume_instchain(chain):
     return res
 
 def make_list(x):
-    return range(x, 0, -1)
+    res = []
+    while x >= 0:
+        res.append(x)
+        x -= 1
+    return res
 
 def consume_list(l):
     res = 0
@@ -204,8 +241,21 @@ class Bench(object):
         print self.name
         print self.run()
 
+    def prolog(self, iterations, count):
+        return "not implemented"
+
+    def pyprolog(self, iterations, count):
+        return "not implemented"
+
+    def prologpy(self, iterations, count):
+        return "not implemented"
+
+    def python(self, iterations, count):
+        return "not implemented"
+
+
 class TinyFunc(Bench):
-    name = "calling a tiny prolog function with 3 arguments and 1 result"
+    name = "calling a small deterministic function with 3 arguments and 1 result"
 
     def prolog(self, iterations, count):
         iterations_countdown = iterations * count
@@ -215,7 +265,7 @@ class TinyFunc(Bench):
         t2 = time.time()
         return t2 - t1
 
-    def both(self, iterations, count):
+    def pyprolog(self, iterations, count):
         iterations_countdown = iterations * count
         t1 = time.time()
         i = iterations_countdown
@@ -224,26 +274,7 @@ class TinyFunc(Bench):
         t2 = time.time()
         return t2 - t1
 
-    def python(self, iterations, count):
-        iterations_countdown = iterations * count
-        t1 = time.time()
-        i = iterations_countdown
-        while i > 0:
-            i = multiply_and_add(i, 1, -1)
-        t2 = time.time()
-        return t2 - t1
-
-class TinyFuncFromProlog(Bench):
-    name = "calling a tiny python function from Prolog with 3 arguments and 1 result"
-
-    def prolog(self, iterations, count):
-        iterations_countdown = iterations * count
-        t1 = time.time()
-        e.db.countdown_using_multiply_and_add(iterations_countdown)
-        t2 = time.time()
-        return t2 - t1
-
-    def both(self, iterations, count):
+    def prologpy(self, iterations, count):
         iterations_countdown = iterations * count
         t1 = time.time()
         e.db.countdown_using_multiply_and_add_in_python(iterations_countdown)
@@ -260,19 +291,29 @@ class TinyFuncFromProlog(Bench):
         return t2 - t1
 
 class Loop1Arg0Result(Bench):
-    name = "calling a loop in prolog with 1 arguments and no results"
+    name = "calling a loop with 1 arguments and no results"
+
     def prolog(self, iterations, count):
         t1 = time.time()
         e.db.countdown_n_times(iterations, count)
         t2 = time.time()
         return t2 - t1
-    def both(self, iterations, count):
+
+    def pyprolog(self, iterations, count):
         t1 = time.time()
         for i in range(iterations):
             res = e.db.countdown(count)
             assert res == ()
         t2 = time.time()
         return t2 - t1
+
+    def prologpy(self, iterations, count):
+        t1 = time.time()
+        res = e.db.countdown_n_times_python(iterations, count)
+        assert res == ()
+        t2 = time.time()
+        return t2 - t1
+
     def python(self, iterations, count):
         t1 = time.time()
         for i in range(iterations):
@@ -281,7 +322,8 @@ class Loop1Arg0Result(Bench):
         return t2 - t1
 
 class Loop1Arg1Result(Bench):
-    name = "calling a loop in prolog with 1 argument and 1 result"
+    name = "calling a loop with 1 argument and 1 result"
+
     def prolog(self, iterations, count):
         correct = sum_up_to_n(count)
         t1 = time.time()
@@ -289,12 +331,19 @@ class Loop1Arg1Result(Bench):
         t2 = time.time()
         return t2 - t1
 
-    def both(self, iterations, count):
+    def pyprolog(self, iterations, count):
         correct = sum_up_to_n(count)
         t1 = time.time()
         for i in range(iterations):
             res, = e.db.sum_up_to_n(count, None)
             assert res == correct
+        t2 = time.time()
+        return t2 - t1
+
+    def prologpy(self, iterations, count):
+        correct = sum_up_to_n(count)
+        t1 = time.time()
+        e.db.sum_up_to_n_many_times_python(iterations, count, correct)
         t2 = time.time()
         return t2 - t1
 
@@ -308,13 +357,21 @@ class Loop1Arg1Result(Bench):
         return t2 - t1
 
 class NondetLoop1Arg1Result(Bench):
-    name = "calling a prolog predicate with 1 arguments and 1 result, with many solutions"
+    name = "calling a predicate with 1 arguments and 1 result, with many solutions"
+
     def prolog(self, iterations, count):
         t1 = time.time()
         e.db.call_gen1_n_times(iterations, count)
         t2 = time.time()
         return t2 - t1
-    def both(self, iterations, count):
+
+    def prologpy(self, iterations, count):
+        t1 = time.time()
+        e.db.call_gen1_n_times_python(iterations, count)
+        t2 = time.time()
+        return t2 - t1
+
+    def pyprolog(self, iterations, count):
         e.db.gen1.many_solutions = True
         t1 = time.time()
         for i in range(iterations):
@@ -322,6 +379,7 @@ class NondetLoop1Arg1Result(Bench):
                 assert i == 1
         t2 = time.time()
         return t2 - t1
+
     def python(self, iterations, count):
         t1 = time.time()
         for i in range(iterations):
@@ -332,20 +390,32 @@ class NondetLoop1Arg1Result(Bench):
 
 class Terms(Bench):
     name = "producing and consuming Prolog terms"
+
     def prolog(self, iterations, count):
+        correct = count * (count + 1) // 2
         t1 = time.time()
-        res = e.db.make_and_consume_chain_n_times(iterations, count)
+        res = e.db.make_and_consume_chain_n_times(iterations, count, correct)
         assert res == ()
         t2 = time.time()
         return t2 - t1
-    def both(self, iterations, count):
+
+    def prologpy(self, iterations, count):
+        correct = count * (count + 1) // 2
+        t1 = time.time()
+        res = e.db.make_and_consume_chain_n_times_python(iterations, count, correct)
+        assert res == ()
+        t2 = time.time()
+        return t2 - t1
+
+    def pyprolog(self, iterations, count):
         correct = count * (count + 1) // 2
         t1 = time.time()
         for i in range(iterations):
-            res = consume_chain_prolog(e.db.make_chain(count, None)[0])
+            res = consume_chain(e.db.make_chain(count, None)[0])
             assert res == correct
         t2 = time.time()
         return t2 - t1
+
     def python(self, iterations, count):
         correct = count * (count + 1) // 2
         t1 = time.time()
@@ -356,14 +426,25 @@ class Terms(Bench):
         return t2 - t1
 
 class PrologLists(Bench):
-    name = "producing and consuming Prolog lists"
+    name = "producing and consuming lists"
+
     def prolog(self, iterations, count):
+        correct = count * (count + 1) // 2
         t1 = time.time()
-        res = e.db.make_and_consume_list_n_times(iterations, count)
+        res = e.db.make_and_consume_list_n_times(iterations, count, correct)
         assert res == ()
         t2 = time.time()
         return t2 - t1
-    def both(self, iterations, count):
+
+    def prologpy(self, iterations, count):
+        correct = count * (count + 1) // 2
+        t1 = time.time()
+        res = e.db.make_and_consume_list_n_times_python(iterations, count, correct)
+        assert res == ()
+        t2 = time.time()
+        return t2 - t1
+
+    def pyprolog(self, iterations, count):
         correct = count * (count + 1) // 2
         t1 = time.time()
         for i in range(iterations):
@@ -371,6 +452,7 @@ class PrologLists(Bench):
             assert res == correct
         t2 = time.time()
         return t2 - t1
+
     def python(self, iterations, count):
         correct = count * (count + 1) // 2
         t1 = time.time()
@@ -382,18 +464,31 @@ class PrologLists(Bench):
 
 class PythonInstances(Bench):
     name = "producing and consuming instances"
+
     def prolog(self, iterations, count):
-        t1 = time.time()
-        e.db.make_and_consume_list_n_times(iterations, count)
-        t2 = time.time()
-        return t2 - t1
-    def both(self, iterations, count):
         correct = count * (count + 1) // 2
         t1 = time.time()
-        res = e.db.make_and_consume_instchain_n_times(iterations, count)
+        e.db.make_and_consume_instchain_n_times(iterations, count, correct)
+        t2 = time.time()
+        return t2 - t1
+
+    def prologpy(self, iterations, count):
+        correct = count * (count + 1) // 2
+        t1 = time.time()
+        res = e.db.make_and_consume_instchain_n_times_python(iterations, count, correct)
         assert res == ()
         t2 = time.time()
         return t2 - t1
+
+    def pyprolog(self, iterations, count):
+        correct = count * (count + 1) // 2
+        t1 = time.time()
+        for i in range(iterations):
+            res = consume_instchain(e.db.make_instchain(count, None)[0])
+            assert res == correct
+        t2 = time.time()
+        return t2 - t1
+
     def python(self, iterations, count):
         correct = count * (count + 1) // 2
         t1 = time.time()
@@ -411,16 +506,25 @@ def main():
                        help='number of iterations')
     parser.add_argument('--count', metavar='count', type=int, default=1000,
                        help='number of inner iterations')
-    #parser.add_argument('--repetitions', metavar='', type=int, default=1000,
-    #                   help='number of benchmark repetitions')
-    parser.add_argument('--variant', metavar='variant', choices=['prolog', 'both', 'python'], default='both',
+    parser.add_argument('--repetitions', metavar='', type=int, default=1,
+                       help='number of benchmark repetitions')
+    parser.add_argument('--variant', metavar='variant', choices=['prolog', 'pyprolog', 'prologpy', 'python', 'all'], default='all',
                        help='which benchmark variant to run')
 
     args = parser.parse_args()
     print "starting"
 
-    for cls in BenchMeta.all_classes: #[PythonInstances]: #NondetLoop1Arg1Result, TinyFunc, TinyFuncFromProlog, Loop1Arg1Result, Loop1Arg0Result]:
-        cls(args).run_single()
+    if args.variant == "all":
+        for cls in BenchMeta.all_classes:
+            inst = cls(args)
+            print inst.name
+            for variant in ["prolog", "python", "pyprolog", "prologpy"]:
+                print variant
+                inst.variant = variant
+                print inst.run()
+    else:
+        for cls in BenchMeta.all_classes:
+            cls(args).run_single()
 
 
 if __name__ == '__main__':
