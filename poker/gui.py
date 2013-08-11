@@ -52,7 +52,6 @@ class RandomHands(object):
 
         with open("poker.pl", "r") as fh: pdb = fh.read()
         self.engine = uni.Engine(pdb)
-        self.engine.db.hand.many_solutions = True
 
         # Stuff for storing and showing results
         self.result_iter = None
@@ -83,7 +82,7 @@ class RandomHands(object):
 
     def _find_winning_hands(self, hand):
         hand_as_terms = [ x.to_term(self.engine) for x in hand ]
-        self.result_iter= self.engine.db.hand(hand_as_terms, None, None)
+        self.result_iter= self.engine.db.hand.iter(hand_as_terms, None, None)
 
     def _erase_result_from_gui(self):
         if self.res_images is not None:
