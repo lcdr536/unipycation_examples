@@ -1,8 +1,9 @@
 import sys
-import uni
 import time
 
-e = uni.Engine("""
+import uni
+
+prolog_source = """
 countdown(0).
 countdown(X) :- X > 0, X0 is X - 1, countdown(X0).
 countdown_n_times(0, _).
@@ -133,7 +134,9 @@ make_instchain(X, In, Out) :-
     make_instchain(X0, Chain, Out).
 make_instchain(0, In, In).
 
-""")
+"""
+
+e = uni.Engine(prolog_source)
 
 def multiply_and_add(a, b, c):
     return a + b * c
@@ -254,7 +257,7 @@ class Bench(object):
         return "not implemented"
 
 
-class TinyFunc(Bench):
+class SmallFunc(Bench):
     name = "calling a small deterministic function with 3 arguments and 1 result"
 
     def prolog(self, iterations, count):
@@ -357,7 +360,7 @@ class Loop1Arg1Result(Bench):
         return t2 - t1
 
 class NondetLoop1Arg1Result(Bench):
-    name = "calling a predicate with 1 arguments and 1 result, with many solutions"
+    name = "calling a predicate with 1 arguments and 1 result, consuming all of its many solutions"
 
     def prolog(self, iterations, count):
         t1 = time.time()
@@ -372,8 +375,8 @@ class NondetLoop1Arg1Result(Bench):
         return t2 - t1
 
     def pyprolog(self, iterations, count):
-        e.db.gen1.many_solutions = True
         t1 = time.time()
+        e.db.gen1.many_solutions = True
         for i in range(iterations):
             for i, in e.db.gen1(count, None):
                 assert i == 1
@@ -388,7 +391,7 @@ class NondetLoop1Arg1Result(Bench):
         t2 = time.time()
         return t2 - t1
 
-class Terms(Bench):
+class TermConstruction(Bench):
     name = "producing and consuming Prolog terms"
 
     def prolog(self, iterations, count):
@@ -425,7 +428,7 @@ class Terms(Bench):
         t2 = time.time()
         return t2 - t1
 
-class PrologLists(Bench):
+class Lists(Bench):
     name = "producing and consuming lists"
 
     def prolog(self, iterations, count):
@@ -463,7 +466,7 @@ class PrologLists(Bench):
         return t2 - t1
 
 class PythonInstances(Bench):
-    name = "producing and consuming instances"
+    name = "producing and consuming Python instances"
 
     def prolog(self, iterations, count):
         correct = count * (count + 1) // 2
@@ -498,6 +501,13 @@ class PythonInstances(Bench):
         t2 = time.time()
         return t2 - t1
 
+nice_names = {
+    "prolog": "Prolog",
+    "python": "Python",
+    "pyprolog": "Python->Prolog",
+    "prologpy": "Prolog->Python",
+}
+
 def main():
     import argparse
 
@@ -510,20 +520,30 @@ def main():
                        help='number of benchmark repetitions')
     parser.add_argument('--variant', metavar='variant', choices=['prolog', 'pyprolog', 'prologpy', 'python', 'all'], default='all',
                        help='which benchmark variant to run')
+    parser.add_argument('--filter', metavar='filter', type=str, default='',
+                       help='which benchmark variant to run')
 
     args = parser.parse_args()
     print "starting"
 
+    classes = [cls for cls in BenchMeta.all_classes if args.filter in cls.__name__ or args.filter in cls.name]
+
     if args.variant == "all":
-        for cls in BenchMeta.all_classes:
+        for cls in classes:
             inst = cls(args)
-            print inst.name
-            for variant in ["prolog", "python", "pyprolog", "prologpy"]:
-                print variant
+            print cls.__name__, ":", inst.name
+            norm_to = -1
+            for variant in ["python", "prolog", "pyprolog", "prologpy"]:
                 inst.variant = variant
-                print inst.run()
+                res = inst.run()
+                if norm_to == -1:
+                    norm_to = res
+                else:
+                    print nice_names[variant]
+                    print "%.3f times slower than pure python" % (res / norm_to, )
+            print "__________________________________"
     else:
-        for cls in BenchMeta.all_classes:
+        for cls in classes:
             cls(args).run_single()
 
 
