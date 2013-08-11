@@ -376,9 +376,8 @@ class NondetLoop1Arg1Result(Bench):
 
     def pyprolog(self, iterations, count):
         t1 = time.time()
-        e.db.gen1.many_solutions = True
         for i in range(iterations):
-            for i, in e.db.gen1(count, None):
+            for i, in e.db.gen1.iter(count, None):
                 assert i == 1
         t2 = time.time()
         return t2 - t1
