@@ -1,66 +1,68 @@
 import sys
+import pprint
 import time
 
 import uni
 
 prolog_source = """
-countdown(0).
 countdown(X) :- X > 0, X0 is X - 1, countdown(X0).
-countdown_n_times(0, _).
+countdown(0).
 countdown_n_times(N, X) :-
     N > 0, countdown(X), N0 is N - 1, countdown_n_times(N0, X).
-countdown_n_times_python(0, _).
+countdown_n_times(0, _).
 countdown_n_times_python(N, X) :-
     N > 0, python:countdown(X, _), N0 is N - 1, countdown_n_times_python(N0, X).
+countdown_n_times_python(0, _).
 
 sum_up_to_n(A, B) :- sum_up_to_n(A, 0, B).
-sum_up_to_n(0, Result, Result).
 sum_up_to_n(A, Accumulator, Result) :-
+    A > 0,
     A0 is A - 1,
     Accumulator1 is Accumulator + A,
     sum_up_to_n(A0, Accumulator1, Result).
-sum_up_to_n_many_times(0, _, _).
+sum_up_to_n(0, Result, Result).
 sum_up_to_n_many_times(N, X, Expected) :-
     N > 0, sum_up_to_n(X, Res), Res == Expected, N0 is N - 1,
     sum_up_to_n_many_times(N0, X, Expected).
-sum_up_to_n_many_times_python(0, _, _).
+sum_up_to_n_many_times(0, _, _).
 sum_up_to_n_many_times_python(N, X, Expected) :-
     N > 0, python:sum_up_to_n(X, Res), Res == Expected, N0 is N - 1,
     sum_up_to_n_many_times_python(N0, X, Expected).
+sum_up_to_n_many_times_python(0, _, _).
 
 multiply_and_add(X, Y, Z, Res) :- Res is X + Y * Z.
-countdown_using_multiply_and_add(0).
 countdown_using_multiply_and_add(N) :-
     N > 0,
     multiply_and_add(N, 1, -1, N0),
     countdown_using_multiply_and_add(N0).
+countdown_using_multiply_and_add(0).
 
-countdown_using_multiply_and_add_in_python(0).
 countdown_using_multiply_and_add_in_python(N) :-
     N > 0,
     python:multiply_and_add(N, 1, -1, N0),
     countdown_using_multiply_and_add_in_python(N0).
+countdown_using_multiply_and_add_in_python(0).
 
 gen1(X, 1) :- X >= 0.
 gen1(X, Y) :- X > 0, X0 is X - 1, gen1(X0, Y).
 
-call_gen1_n_times(0, _).
 call_gen1_n_times(Iterations, Count) :-
     Iterations > 0,
     ((gen1(Count, X), X == 1, fail); true),
     Iterations0 is Iterations - 1,
     call_gen1_n_times(Iterations0, Count).
+call_gen1_n_times(0, _).
 
-call_gen1_n_times_python(0, _).
 call_gen1_n_times_python(Iterations, Count) :-
     Iterations > 0,
     ((python:gen1(Count, X), X == 1, fail); true),
     Iterations0 is Iterations - 1,
     call_gen1_n_times_python(Iterations0, Count).
+call_gen1_n_times_python(0, _).
 
 make_chain(A, B) :- make_chain(A, end, B).
 make_chain(X, In, Out) :-
-    X >= 0,
+    X > 0,
     X0 is X - 1,
     X2 is X * 2,
     make_chain(X0, pair(X, X2, In), Out).
@@ -71,10 +73,10 @@ consume_chain(pair(X, X2, Next), In, Out) :-
     In1 is In + X2 - X,
     consume_chain(Next, In1, Out).
 
-make_and_consume_chain_n_times(0, _, _).
 make_and_consume_chain_n_times(N, X, Expected) :-
     N > 0, make_chain(X, Chain), consume_chain(Chain, 0, Res), Res == Expected,
     N0 is N - 1, make_and_consume_chain_n_times(N0, X, Expected).
+make_and_consume_chain_n_times(0, _, _).
 
 make_and_consume_chain_n_times_python(0, _, _).
 make_and_consume_chain_n_times_python(N, X, Expected) :-
@@ -83,7 +85,7 @@ make_and_consume_chain_n_times_python(N, X, Expected) :-
 
 make_list(A, B) :- make_list(A, [], B).
 make_list(X, In, Out) :-
-    X >= 0,
+    X > 0,
     X0 is X - 1,
     make_list(X0, [X|In], Out).
 make_list(0, In, In).
@@ -93,16 +95,16 @@ consume_list([X | Next], In, Out) :-
     In1 is In + X,
     consume_list(Next, In1, Out).
 
-make_and_consume_list_n_times(0, _, _).
 make_and_consume_list_n_times(N, X, Expected) :-
     N > 0, make_list(X, List), consume_list(List, 0, Result), Result == Expected,
     N0 is N - 1, make_and_consume_list_n_times(N0, X, Expected).
+make_and_consume_list_n_times(0, _, _).
 
-make_and_consume_list_n_times_python(0, _, _).
 make_and_consume_list_n_times_python(N, X, Expected) :-
     N > 0, python:make_list(X, PyList), python:uni:build_prolog_list(PyList, List),
     consume_list(List, 0, Result), Result == Expected,
     N0 is N - 1, make_and_consume_list_n_times_python(N0, X, Expected).
+make_and_consume_list_n_times_python(0, _, _).
 
 consume_instchain(Inst, X, X) :- Inst:is_terminator(1).
 consume_instchain(Inst, In, Out) :-
@@ -113,22 +115,22 @@ consume_instchain(Inst, In, Out) :-
     consume_instchain(Next, In1, Out).
 
 
-make_and_consume_instchain_n_times(0, _, _).
 make_and_consume_instchain_n_times(N, X, Expected) :-
     N > 0, make_instchain(X, List), consume_instchain(List, 0, Res), Res == Expected,
     N0 is N - 1, make_and_consume_instchain_n_times(N0, X, Expected).
+make_and_consume_instchain_n_times(0, _, _).
 
-make_and_consume_instchain_n_times_python(0, _, _).
 make_and_consume_instchain_n_times_python(N, X, Expected) :-
     N > 0, python:make_instchain(X, List), consume_instchain(List, 0, Res), Res == Expected,
     N0 is N - 1, make_and_consume_instchain_n_times_python(N0, X, Expected).
+make_and_consume_instchain_n_times_python(0, _, _).
 
 make_instchain(A, B) :-
     python:'Terminator'(T),
     make_instchain(A, T, B).
 
 make_instchain(X, In, Out) :-
-    X >= 0,
+    X > 0,
     X0 is X - 1,
     python:'Chain'(X, In, Chain),
     make_instchain(X0, Chain, Out).
@@ -227,6 +229,9 @@ class BenchMeta(type):
         res = type.__new__(cls, name, bases, dct)
         if name != "Bench":
             BenchMeta.all_classes.append(res)
+        for key, val in dct.iteritems():
+            if hasattr(val, 'func_name'):
+                val.func_name = val.func_name + "_" + name # easier to read in trace
         return res
 
 class Bench(object):
@@ -237,12 +242,16 @@ class Bench(object):
         self.count = args.count
         self.variant = args.variant
 
-    def run(self):
-        return getattr(self, self.variant)(self.iterations, self.count)
+    def run(self, repetitions=1):
+        results = []
+        for i in range(repetitions):
+            res = getattr(self, self.variant)(self.iterations, self.count)
+            results.append(res)
+        return results
 
     def run_single(self):
         print self.name
-        print self.run()
+        print self.run()[0]
 
     def prolog(self, iterations, count):
         return "not implemented"
@@ -528,13 +537,16 @@ def main():
     classes = [cls for cls in BenchMeta.all_classes if args.filter in cls.__name__ or args.filter in cls.name]
 
     if args.variant == "all":
+        all_results = {}
         for cls in classes:
             inst = cls(args)
             print cls.__name__, ":", inst.name
             norm_to = -1
             for variant in ["python", "prolog", "pyprolog", "prologpy"]:
                 inst.variant = variant
-                res = inst.run()
+                results = inst.run(args.repetitions)
+                all_results[cls.__name__, variant] = results
+                res = results[-1]
                 if norm_to == -1:
                     norm_to = res
                 else:
@@ -544,6 +556,8 @@ def main():
     else:
         for cls in classes:
             cls(args).run_single()
+    with file("out.json", "w") as f:
+        print >> f, pprint.pformat(all_results)
 
 
 if __name__ == '__main__':
