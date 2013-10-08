@@ -94,13 +94,13 @@ class Connect4(object):
 
         for c in pylist:
             assert c.name == "c"
-            (x, y) = (c.args[0], c.args[1])
+            (x, y) = c
             self.cols[x][y]["background"] = colour
 
     def _update_from_pos(self, pos):
         """ update the game state from the result of alphabeta """
-        self._update_from_pos_one_colour(pos.args[0], "red")
-        self._update_from_pos_one_colour(pos.args[1], "yellow")
+        self._update_from_pos_one_colour(pos[0], "red")
+        self._update_from_pos_one_colour(pos[1], "yellow")
 
     def _player_colour(self):
         return "red" if self.turn else "yellow"
