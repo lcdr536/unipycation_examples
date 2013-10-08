@@ -14,8 +14,7 @@ class Connect4(object):
         self.top = tk.Tk()
         self.top.title("Unipycation: Connect 4 GUI (Python)")
 
-        with open("connect4.pl", "r") as f: pdb = f.read()
-        self.pl_engine = uni.Engine(pdb)
+        self.pl_engine = uni.Engine.from_file("connect4.pl")
 
         # controls cpu/human players
         self.turn = None # True for p1, False for p2
