@@ -89,22 +89,9 @@ class Connect4(object):
         return [ (x, y) for x in range(COLS) for y in range(ROWS)
                 if self.cols[x][y]["background"] == colour ]
 
-    def _update_from_pos_one_colour(self, term_list, colour):
+    def _update_from_pos_one_colour(self, pylist, colour):
         assert colour in ["red", "yellow"]
 
-        # XXX work around unipycation "bug"
-        # Lists inside terms are not currently unwrapped
-        # Iterative to avoid slicing
-        def unwrap_prolog_list(cons):
-            ret = []
-            while cons != "[]":
-                assert isinstance(cons, uni.Term)
-                assert cons.name == "."
-                ret.append(cons.args[0])
-                cons = cons[1]
-            return ret
-
-        pylist = unwrap_prolog_list(term_list)
         for c in pylist:
             assert c.name == "c"
             (x, y) = (c.args[0], c.args[1])
