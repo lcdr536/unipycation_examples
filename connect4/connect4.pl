@@ -49,30 +49,26 @@ staticval(pos(RedCounters, YellowCounters, _), WinVal) :-
     choose_base_on_color(-99999, 99999, WhoWon, WinVal), !. % heavy weights for win
 
 staticval(pos(RedCounters, YellowCounters, _), Val) :-
-    staticval_player(RedCounters, RedCounters, ValRed),
-    staticval_player(YellowCounters, YellowCounters, ValYellow),
+    staticval_player(RedCounters, ValRed),
+    staticval_player(YellowCounters, ValYellow),
     Val is ValYellow - ValRed.
 
 % Collects the score of a single player's counters.
-staticval_player(_, [], 0). % No work left, we are done.
-staticval_player(OnePlayersCounters, [WorkCounter | OtherWorkCounters], Val) :-
-    staticval_counter(OnePlayersCounters, WorkCounter, CounterVal),
-    staticval_player(OnePlayersCounters, OtherWorkCounters, OtherCounterVals),
-    Val is CounterVal + OtherCounterVals.
-
-% Collects the score of a single counter
-staticval_counter(OnePlayersCounters, WorkCounter, CounterVal) :-
-    findall(1, find_consecutive(OnePlayersCounters, 2, WorkCounter), List),
-    length(List, CounterVal).
+staticval_player(PlayersCounters, Val) :-
+    findall(1, (
+        member(WorkCounter, PlayersCounters),
+        find_consecutive(PlayersCounters, 2, WorkCounter)
+    ), List),
+    length(List, Val).
 
 % Finds how high a token would sit when inserted
 get_insert_y(Toks, Col, YVal) :-
     board_height(H),
     get_insert_y(Toks, Col, H, YVal).
 
-get_insert_y([], Col, Min, YVal) :-
+get_insert_y([], _, Min, YVal) :-
     YVal is Min - 1.
-get_insert_y([c(Col1, Y) | Rest], Col, Min, YVal) :-
+get_insert_y([c(Col1, _) | Rest], Col, Min, YVal) :-
     Col1 \= Col,
     get_insert_y(Rest, Col, Min, YVal).
 get_insert_y([c(Col, Y) | Rest], Col, Min, YVal) :-
