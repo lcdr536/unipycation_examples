@@ -8,6 +8,9 @@ direction(v(0, 1), vertical).
 direction(v(1, 1), lrdiagonal).
 direction(v(-1, 1), rldiagnoal).
 
+choose_base_on_color(Reds, _, red, Reds).
+choose_base_on_color(_, Yellows, yellow, Yellows).
+
 search_vector(_, _, _, Required, Required).
 search_vector(Coins, c(X, Y), v(Xd, Yd), Required, Ct) :-
     board_width(W), -1 < X, X < W,
@@ -22,13 +25,10 @@ find_consecutive(Coins, Required, C) :-
     direction(Vec, _),
     search_vector(Coins, C, Vec, Required, 0).
 
-has_won(Reds, _, red) :-
-    member(C, Reds),
-    find_consecutive(Reds, 4, C), !.
-
-has_won(_, Yellows, yellow) :-
-    member(C, Yellows),
-    find_consecutive(Yellows, 4, C), !.
+has_won(Reds, Yellows, Color) :-
+    choose_base_on_color(Reds, Yellows, Color, Coordinates),
+    member(C, Coordinates),
+    find_consecutive(Coordinates, 4, C), !.
 
 % Test case
 % Note the validity of the board is not checked.
@@ -46,7 +46,7 @@ main(Winner):-
 % Note that the board state is not checked to be valid.
 staticval(pos(RedCounters, YellowCounters, _), WinVal) :-
     has_won(RedCounters, YellowCounters, WhoWon), !,
-    (WhoWon = red -> WinVal = -99999; WinVal = 99999), !. % heavy weights for win
+    choose_base_on_color(-99999, 99999, WhoWon, WinVal), !. % heavy weights for win
 
 staticval(pos(RedCounters, YellowCounters, _), Val) :-
     staticval_player(RedCounters, RedCounters, ValRed),
@@ -80,13 +80,9 @@ get_insert_y(Toks, Col, YVal) :-
 insert_token(pos(Reds, Yellows, WhoseMove), Col, Move) :-
     append(Reds, Yellows, AllToks),
     get_insert_y(AllToks, Col, Y),
-    (WhoseMove = red -> (
-        append(Reds, [c(Col, Y)], NewReds),
-        Move = pos(NewReds, Yellows, yellow)
-    ) ; (
-        append(Yellows, [c(Col, Y)], NewYellows),
-        Move = pos(Reds, NewYellows, red)
-    )).
+    choose_base_on_color(pos([c(Col, Y) | Reds], Yellows, yellow),
+                         pos(Reds, [c(Col, Y) | Yellows], red),
+                         WhoseMove, Move).
 
 % Find all possible subsequent game states
 moves(pos(Reds, Yellows, _), []) :- % if someone won, dont collect moves
