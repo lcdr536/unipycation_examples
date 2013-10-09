@@ -67,14 +67,17 @@ staticval_counter(OnePlayersCounters, WorkCounter, CounterVal) :-
 
 % Finds how high a token would sit when inserted
 get_insert_y(Toks, Col, YVal) :-
-    findall(Y, member(c(Col, Y), Toks), Ys),
-    (length(Ys, 0) -> (
-        board_height(H),
-        YVal is H - 1
-    ); (
-        min_member(TopY, Ys),
-        YVal is TopY - 1
-    )).
+    board_height(H),
+    get_insert_y(Toks, Col, H, YVal).
+
+get_insert_y([], Col, Min, YVal) :-
+    YVal is Min - 1.
+get_insert_y([c(Col1, Y) | Rest], Col, Min, YVal) :-
+    Col1 \= Col,
+    get_insert_y(Rest, Col, Min, YVal).
+get_insert_y([c(Col, Y) | Rest], Col, Min, YVal) :-
+    NewMin is min(Y, Min),
+    get_insert_y(Rest, Col, NewMin, YVal).
 
 % Computes the new board state should we insert a token
 insert_token(pos(Reds, Yellows, WhoseMove), Col, Move) :-
