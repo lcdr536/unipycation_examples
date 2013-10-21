@@ -90,7 +90,13 @@ max_spin.grid(row=row, column=col+1)
 for i in range(4): max_spin.invoke("buttonup")
 col += 2
 
-find_paths_closure = lambda : find_paths(top, e, nodes, edges, from_entry, max_spin, go_button)
+# status bar
+INITIAL_STATUS_TEXT="Awaiting path specification"
+status_lbl = tk.Label(top, text=INITIAL_STATUS_TEXT)
+status_lbl.grid(column=1, row=3)
+
+# Button
+find_paths_closure = lambda : find_paths(top, e, nodes, edges, from_entry, max_spin, go_button, status_lbl)
 
 INITIAL_BUTTON_TEXT = "Find Paths"
 NEXT_BUTTON_TEXT = "Next Path"
@@ -113,10 +119,11 @@ def get_edges(src_node):
    return iter(edges[src_node])
 
 # Called when the "find paths" button is clicked for the first time
-def find_paths(top, engine, nodes, edges, from_entry, max_spin, go_button):
+def find_paths(top, engine, nodes, edges, from_entry,
+        max_spin, go_button, status_lbl):
     paths = e.db.path.iter
     sol_iter = paths(from_entry.get(), None, int(max_spin.get()), None)
-    generator = cycle_results(top, sol_iter, nodes, edges)
+    generator = cycle_results(top, sol_iter, nodes, edges, status_lbl)
 
     # Now we have result iterator, we change the function of the button.
     # Each press will find another path until no more.
@@ -130,6 +137,7 @@ def find_paths(top, engine, nodes, edges, from_entry, max_spin, go_button):
             # re-enable the user input widgets
             from_entry["state"] = tk.NORMAL
             max_spin["state"] = tk.NORMAL
+            status_lbl["text"] = INITIAL_STATUS_TEXT
 
     go_button["command"] = lambda : new_button_command(
         generator, from_entry, max_spin, go_button)
@@ -144,11 +152,11 @@ def find_paths(top, engine, nodes, edges, from_entry, max_spin, go_button):
 
 # Generator pumped lazily to get next path.
 # Called when "next path" clicked
-def cycle_results(top, sol_iter, nodes, edges):
+def cycle_results(top, sol_iter, nodes, edges, status_lbl):
     for (to, path) in sol_iter:
         gen_graph(edges, nodes, path)
         show_graph()
-        top.update_idletasks()
+        status_lbl["text"] = str(path)
         yield
     # reset
     gen_graph(edges, nodes)
