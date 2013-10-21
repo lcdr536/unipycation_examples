@@ -112,6 +112,7 @@ show_graph()
 def get_edges(src_node):
    return iter(edges[src_node])
 
+# Called when the "find paths" button is clicked for the first time
 def find_paths(top, engine, nodes, edges, from_entry, max_spin, go_button):
     paths = e.db.path.iter
 
@@ -122,6 +123,8 @@ def find_paths(top, engine, nodes, edges, from_entry, max_spin, go_button):
     generator = cycle_results(top, found_paths, nodes, edges)
     generator.next()
 
+    # Now we have results, we change the function of the button.
+    # Each press will find another path until no more.
     def new_button_command(generator, from_entry, max_spin, button):
         try:
             generator.next()
@@ -133,16 +136,15 @@ def find_paths(top, engine, nodes, edges, from_entry, max_spin, go_button):
             from_entry["state"] = tk.NORMAL
             max_spin["state"] = tk.NORMAL
 
-    # Now we have results, we change the function of the button.
-    # Each press will find another path until no more.
-    go_button["command"] = lambda : new_button_command(generator, from_entry, max_spin, go_button)
+    go_button["command"] = lambda : new_button_command(
+        generator, from_entry, max_spin, go_button)
     go_button["text"] = NEXT_BUTTON_TEXT
 
     # Dim out entries
     from_entry["state"] = tk.DISABLED
     max_spin["state"] = tk.DISABLED
 
-
+# 
 def cycle_results(top, found_paths, nodes, edges):
     for (to, path) in found_paths:
         gen_graph(edges, nodes, path)
