@@ -16,8 +16,6 @@ edges = {
 def edges_to_tuples(edges):
     return [ (x,  y)  for x in edges.keys() for y in edges[x] ]
 
-# GUI code
-
 # [a, b, c] -> [(a, b), (b, c)]
 def edge_tuples_from_nodes_list(nodes):
     edge_tuples = []
@@ -54,7 +52,6 @@ def gen_graph(edges, nodes, active_nodes=[]):
 
 # Instantiate Prolog
 e = uni.Engine("""
-    edge(From, To) :- python:get_edges(From, To).
     path(From, To, MaxLen, Nodes) :-
         path(From, To, MaxLen, Nodes, 1).
 
@@ -63,6 +60,8 @@ e = uni.Engine("""
         Len < MaxLen, edge(From, Next),
         Len1 is Len + 1,
         path(Next, To, MaxLen, Ahead, Len1).
+
+    edge(From, To) :- python:get_edges(From, To).
 """)
 
 # Generate initial graph
@@ -84,19 +83,12 @@ from_entry.grid(row=row, column=col+1)
 from_entry.insert(0, "d")
 col += 2
 
-#to_lbl = tk.Label(entry_frame, text="To:")
-#to_lbl.grid(column=col, row=row)
-#to_entry = tk.Entry(entry_frame)
-#to_entry.grid(row=row, column=col+1)
-#col += 2
-
 max_lbl = tk.Label(entry_frame, text="Max nodes:")
 max_lbl.grid(column=col, row=row)
 max_spin = tk.Spinbox(entry_frame, from_=0, to=9)
 max_spin.grid(row=row, column=col+1)
 for i in range(4): max_spin.invoke("buttonup")
 col += 2
-
 
 find_paths_closure = lambda : find_paths(top, e, nodes, edges, from_entry, max_spin)
 
