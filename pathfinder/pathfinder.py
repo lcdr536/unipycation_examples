@@ -1,5 +1,5 @@
 import pydot, Tkinter as tk
-import sys, uni
+import sys, uni, time, pydot
 
 # suppose this came out of the xml parser
 nodes = ["a", "b", "c", "d", "e", "f", "g" ]
@@ -18,13 +18,29 @@ def edges_to_tuples(edges):
 
 # GUI code
 
-def gen_graph(edges, nodes, active_edges=[]):
-    import pydot
+# [a, b, c] -> [(a, b), (b, c)]
+def edge_tuples_from_nodes_list(nodes):
+    edge_tuples = []
+    for i in range(len(nodes) - 1):
+        edge_tuples.append((nodes[i], nodes[i+1]))
+    return edge_tuples
+
+def gen_graph(edges, nodes, active_nodes=[]):
     tuples = edges_to_tuples(edges)
-    graph = pydot.Dot(graph_type='digraph', rankdir="lr")
+    graph = pydot.Dot(graph_type='digraph')
+
+    active_edges = edge_tuples_from_nodes_list(active_nodes)
+
+    print(72 * "-")
+    print("edges: %s" % edges)
+    print("nodes: %s" % nodes)
+    print("active: %s" % active_edges)
+    print(72 * "-")
 
     for n in nodes:
-        graph.add_node(pydot.Node(n, shape="none"))
+        colour = "red" if n in active_nodes else "black"
+        print("NODE COLOUR: %s" % colour)
+        graph.add_node(pydot.Node(n, shape="none", fontcolor=colour))
 
     for (src, dest) in tuples:
         print("%s in %s: %s" % ((src, dest), active_edges, (src, dest) in active_edges))
@@ -33,7 +49,8 @@ def gen_graph(edges, nodes, active_edges=[]):
         e = pydot.Edge(src, dest, color=edge_colour)
         graph.add_edge(e)
 
-    return graph
+    graph.set_rankdir("LR")
+    graph.write("mygraph.gif", format="gif")
 
 # Instantiate Prolog
 e = uni.Engine("""
@@ -49,9 +66,7 @@ e = uni.Engine("""
 """)
 
 # Generate initial graph
-graph = gen_graph(edges, nodes, active_edges=[("c", "b")])
-graph.set_rankdir("LR")
-graph.write("mygraph.gif", format="gif")
+graph = gen_graph(edges, nodes)
 
 # Set up GUI
 top = tk.Tk()
@@ -81,7 +96,7 @@ max_spin.grid(row=row, column=col+1)
 col += 2
 
 
-find_paths_closure = lambda : find_paths(e, from_entry, max_spin)
+find_paths_closure = lambda : find_paths(top, e, nodes, edges, from_entry, max_spin)
 
 go_button = tk.Button(entry_frame, text="Find Paths",
     command=find_paths_closure)
@@ -89,22 +104,31 @@ go_button.grid(row=row, column=col)
 col += 2
 
 # initial graph display
-col = 1; row += 1
-graph_img = tk.PhotoImage(file="mygraph.gif")
-graph_lbl = tk.Label(image=graph_img)
-graph_lbl.grid(column=1, row=row)
+def show_graph():
+    col = 1; row = 2
+    graph_img = tk.PhotoImage(file="mygraph.gif")
+    graph_lbl = tk.Label(image=graph_img)
+    graph_lbl.grid(column=1, row=row)
+show_graph()
 
 # Prolog helper
 def get_edges(src_node):
    return iter(edges[src_node])
 
-def find_paths(engine, from_entry, max_spin):
+def find_paths(top, engine, nodes, edges, from_entry, max_spin):
     print("click")
     paths = e.db.path.iter
 
-    # fetch parameters from gui
-    for (to, nodes) in paths(from_entry.get(), None, int(max_spin.get()), None):
-        print("To %s via %s" % (to, nodes))
+    # fetch parameters from gui and query
+    found_paths = [ (to, path) for (to, path) in
+        paths(from_entry.get(), None, int(max_spin.get()), None) ]
+    print("%d paths found" % len(found_paths))
+
+    for (to, path) in found_paths:
+        gen_graph(edges, nodes, path)
+        show_graph()
+        top.update_idletasks()
+        time.sleep(1)
 
 # go
 top.mainloop()
