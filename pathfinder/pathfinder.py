@@ -67,10 +67,11 @@ e = uni.Engine("""
 # Generate initial graph
 graph = gen_graph(edges, nodes)
 
-# Set up GUI
-class Gui(object): # a place to stash gui widgets
+# A place to stash gui widgets.
+class Gui(object):
     pass
 
+# Set up GUI
 gui = Gui()
 
 gui.top = tk.Tk()
