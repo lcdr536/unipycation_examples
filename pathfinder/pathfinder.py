@@ -72,23 +72,20 @@ top = tk.Tk()
 top.title("Unipycation: PathFinder")
 
 # entry boxes
-col = 1; row = 1
 entry_frame = tk.Frame(top)
-entry_frame.grid(row=row, column=1)
+entry_frame.grid(row=1, column=1)
 
 from_lbl = tk.Label(entry_frame, text="From:")
-from_lbl.grid(column=col, row=row)
+from_lbl.grid(column=1, row=1)
 from_entry = tk.Entry(entry_frame)
-from_entry.grid(row=row, column=col+1)
+from_entry.grid(row=1, column=2)
 from_entry.insert(0, "d")
-col += 2
 
 max_lbl = tk.Label(entry_frame, text="Max nodes:")
-max_lbl.grid(column=col, row=row)
+max_lbl.grid(column=3, row=1)
 max_spin = tk.Spinbox(entry_frame, from_=1, to=9)
-max_spin.grid(row=row, column=col+1)
+max_spin.grid(row=1, column=4)
 for i in range(4): max_spin.invoke("buttonup")
-col += 2
 
 # status bar
 INITIAL_STATUS_TEXT="Awaiting path specification"
@@ -103,15 +100,13 @@ NEXT_BUTTON_TEXT = "Next Path"
 go_button = tk.Button(entry_frame,
     text=INITIAL_BUTTON_TEXT,
     command=find_paths_closure)
-go_button.grid(row=row, column=col)
-col += 2
+go_button.grid(row=1, column=5)
 
 # initial graph display
 def show_graph():
-    col = 1; row = 2
     graph_img = tk.PhotoImage(file="mygraph.gif")
     graph_lbl = tk.Label(image=graph_img)
-    graph_lbl.grid(column=1, row=row)
+    graph_lbl.grid(column=1, row=2)
 show_graph()
 
 # Prolog helper
