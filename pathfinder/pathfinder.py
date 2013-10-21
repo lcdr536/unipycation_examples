@@ -38,9 +38,18 @@ def gen_graph(edges, nodes, active_nodes=[]):
     print(72 * "-")
 
     for n in nodes:
-        colour = "red" if n in active_nodes else "black"
-        print("NODE COLOUR: %s" % colour)
-        graph.add_node(pydot.Node(n, shape="none", fontcolor=colour))
+        if  n in active_nodes:
+            fontcolour="red"
+            fillcolour="#cccccc"
+        else:
+            fontcolour="black"
+            fillcolour="white"
+
+        graph.add_node(pydot.Node(n,
+            style="filled",
+            fillcolor=fillcolour,
+            fontcolor=fontcolour)
+            )
 
     for (src, dest) in tuples:
         print("%s in %s: %s" % ((src, dest), active_edges, (src, dest) in active_edges))
@@ -129,6 +138,10 @@ def find_paths(top, engine, nodes, edges, from_entry, max_spin):
         show_graph()
         top.update_idletasks()
         time.sleep(1)
+
+    # reset
+    gen_graph(edges, nodes)
+    show_graph()
 
 # go
 top.mainloop()
