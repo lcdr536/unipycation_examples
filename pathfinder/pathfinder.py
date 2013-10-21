@@ -28,14 +28,7 @@ def edge_tuples_from_nodes_list(nodes):
 def gen_graph(edges, nodes, active_nodes=[]):
     tuples = edges_to_tuples(edges)
     graph = pydot.Dot(graph_type='digraph')
-
     active_edges = edge_tuples_from_nodes_list(active_nodes)
-
-    print(72 * "-")
-    print("edges: %s" % edges)
-    print("nodes: %s" % nodes)
-    print("active: %s" % active_edges)
-    print(72 * "-")
 
     for n in nodes:
         if  n in active_nodes:
@@ -52,9 +45,7 @@ def gen_graph(edges, nodes, active_nodes=[]):
             )
 
     for (src, dest) in tuples:
-        print("%s in %s: %s" % ((src, dest), active_edges, (src, dest) in active_edges))
         edge_colour = "red" if (src, dest) in active_edges else "black"
-        print(edge_colour)
         e = pydot.Edge(src, dest, color=edge_colour)
         graph.add_edge(e)
 
@@ -125,13 +116,11 @@ def get_edges(src_node):
    return iter(edges[src_node])
 
 def find_paths(top, engine, nodes, edges, from_entry, max_spin):
-    print("click")
     paths = e.db.path.iter
 
     # fetch parameters from gui and query
     found_paths = [ (to, path) for (to, path) in
         paths(from_entry.get(), None, int(max_spin.get()), None) ]
-    print("%d paths found" % len(found_paths))
 
     for (to, path) in found_paths:
         gen_graph(edges, nodes, path)
