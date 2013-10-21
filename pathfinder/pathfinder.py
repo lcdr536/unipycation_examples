@@ -90,9 +90,12 @@ max_spin.grid(row=row, column=col+1)
 for i in range(4): max_spin.invoke("buttonup")
 col += 2
 
-find_paths_closure = lambda : find_paths(top, e, nodes, edges, from_entry, max_spin)
+find_paths_closure = lambda : find_paths(top, e, nodes, edges, from_entry, max_spin, go_button)
 
-go_button = tk.Button(entry_frame, text="Find Paths",
+INITIAL_BUTTON_TEXT = "Find Paths"
+NEXT_BUTTON_TEXT = "Next Path"
+go_button = tk.Button(entry_frame,
+    text=INITIAL_BUTTON_TEXT,
     command=find_paths_closure)
 go_button.grid(row=row, column=col)
 col += 2
@@ -109,18 +112,43 @@ show_graph()
 def get_edges(src_node):
    return iter(edges[src_node])
 
-def find_paths(top, engine, nodes, edges, from_entry, max_spin):
+def find_paths(top, engine, nodes, edges, from_entry, max_spin, go_button):
     paths = e.db.path.iter
 
     # fetch parameters from gui and query
     found_paths = [ (to, path) for (to, path) in
         paths(from_entry.get(), None, int(max_spin.get()), None) ]
 
+    generator = cycle_results(top, found_paths, nodes, edges)
+    generator.next()
+
+    def new_button_command(generator, from_entry, max_spin, button):
+        try:
+            generator.next()
+        except StopIteration:
+            # Once exhausted, revert button to initaial function
+            go_button["command"] = find_paths_closure
+            go_button["text"] = INITIAL_BUTTON_TEXT
+            # re-enable the user input widgets
+            from_entry["state"] = tk.NORMAL
+            max_spin["state"] = tk.NORMAL
+
+    # Now we have results, we change the function of the button.
+    # Each press will find another path until no more.
+    go_button["command"] = lambda : new_button_command(generator, from_entry, max_spin, go_button)
+    go_button["text"] = NEXT_BUTTON_TEXT
+
+    # Dim out entries
+    from_entry["state"] = tk.DISABLED
+    max_spin["state"] = tk.DISABLED
+
+
+def cycle_results(top, found_paths, nodes, edges):
     for (to, path) in found_paths:
         gen_graph(edges, nodes, path)
         show_graph()
         top.update_idletasks()
-        time.sleep(1)
+        yield
 
     # reset
     gen_graph(edges, nodes)
