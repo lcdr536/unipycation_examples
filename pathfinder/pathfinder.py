@@ -85,7 +85,7 @@ col += 2
 
 max_lbl = tk.Label(entry_frame, text="Max nodes:")
 max_lbl.grid(column=col, row=row)
-max_spin = tk.Spinbox(entry_frame, from_=0, to=9)
+max_spin = tk.Spinbox(entry_frame, from_=1, to=9)
 max_spin.grid(row=row, column=col+1)
 for i in range(4): max_spin.invoke("buttonup")
 col += 2
@@ -115,15 +115,10 @@ def get_edges(src_node):
 # Called when the "find paths" button is clicked for the first time
 def find_paths(top, engine, nodes, edges, from_entry, max_spin, go_button):
     paths = e.db.path.iter
+    sol_iter = paths(from_entry.get(), None, int(max_spin.get()), None)
+    generator = cycle_results(top, sol_iter, nodes, edges)
 
-    # fetch parameters from gui and query
-    found_paths = [ (to, path) for (to, path) in
-        paths(from_entry.get(), None, int(max_spin.get()), None) ]
-
-    generator = cycle_results(top, found_paths, nodes, edges)
-    generator.next()
-
-    # Now we have results, we change the function of the button.
+    # Now we have result iterator, we change the function of the button.
     # Each press will find another path until no more.
     def new_button_command(generator, from_entry, max_spin, button):
         try:
@@ -144,14 +139,17 @@ def find_paths(top, engine, nodes, edges, from_entry, max_spin, go_button):
     from_entry["state"] = tk.DISABLED
     max_spin["state"] = tk.DISABLED
 
-# 
-def cycle_results(top, found_paths, nodes, edges):
-    for (to, path) in found_paths:
+    # show first path
+    new_button_command(generator, from_entry, max_spin, go_button)
+
+# Generator pumped lazily to get next path.
+# Called when "next path" clicked
+def cycle_results(top, sol_iter, nodes, edges):
+    for (to, path) in sol_iter:
         gen_graph(edges, nodes, path)
         show_graph()
         top.update_idletasks()
         yield
-
     # reset
     gen_graph(edges, nodes)
     show_graph()
