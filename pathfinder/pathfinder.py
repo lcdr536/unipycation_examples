@@ -68,6 +68,10 @@ e = uni.Engine("""
 graph = gen_graph(edges, nodes)
 
 # A place to stash gui widgets.
+#
+# You would probably put the actual GUI functionality in this object too.
+# We refrain for the sake of a simple (flat) example that can
+# easily be shown on slides.
 class Gui(object):
     pass
 
@@ -111,7 +115,7 @@ gui.go_button.grid(row=1, column=5)
 # initial graph display
 def show_graph(gui):
     graph_img = tk.PhotoImage(file="mygraph.gif")
-    gui.graph_lbl = tk.Label(image=graph_img)
+    gui.graph_lbl = tk.Label(gui.top, image=graph_img)
     gui.graph_lbl.grid(column=1, row=2)
 show_graph(gui)
 
