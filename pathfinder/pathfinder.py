@@ -68,94 +68,97 @@ e = uni.Engine("""
 graph = gen_graph(edges, nodes)
 
 # Set up GUI
-top = tk.Tk()
-top.title("Unipycation: PathFinder")
+class Gui(object): # a place to stash gui widgets
+    pass
+
+gui = Gui()
+
+gui.top = tk.Tk()
+gui.top.title("Unipycation: PathFinder")
 
 # entry boxes
-entry_frame = tk.Frame(top)
-entry_frame.grid(row=1, column=1)
+gui.entry_frame = tk.Frame(gui.top)
+gui.entry_frame.grid(row=1, column=1)
 
-from_lbl = tk.Label(entry_frame, text="From:")
-from_lbl.grid(column=1, row=1)
-from_entry = tk.Entry(entry_frame)
-from_entry.grid(row=1, column=2)
-from_entry.insert(0, "d")
+gui.from_lbl = tk.Label(gui.entry_frame, text="From:")
+gui.from_lbl.grid(column=1, row=1)
+gui.from_entry = tk.Entry(gui.entry_frame)
+gui.from_entry.grid(row=1, column=2)
+gui.from_entry.insert(0, "d")
 
-max_lbl = tk.Label(entry_frame, text="Max nodes:")
-max_lbl.grid(column=3, row=1)
-max_spin = tk.Spinbox(entry_frame, from_=1, to=9)
-max_spin.grid(row=1, column=4)
-for i in range(4): max_spin.invoke("buttonup")
+gui.max_lbl = tk.Label(gui.entry_frame, text="Max nodes:")
+gui.max_lbl.grid(column=3, row=1)
+gui.max_spin = tk.Spinbox(gui.entry_frame, from_=1, to=9)
+gui.max_spin.grid(row=1, column=4)
+for i in range(4): gui.max_spin.invoke("buttonup")
 
 # status bar
 INITIAL_STATUS_TEXT="Awaiting path specification"
-status_lbl = tk.Label(top, text=INITIAL_STATUS_TEXT)
-status_lbl.grid(column=1, row=3)
+gui.status_lbl = tk.Label(gui.top, text=INITIAL_STATUS_TEXT)
+gui.status_lbl.grid(column=1, row=3)
 
 # Button
-find_paths_closure = lambda : find_paths(top, e, nodes, edges, from_entry, max_spin, go_button, status_lbl)
+find_paths_closure = lambda : find_paths(gui, e, nodes, edges)
 
 INITIAL_BUTTON_TEXT = "Find Paths"
 NEXT_BUTTON_TEXT = "Next Path"
-go_button = tk.Button(entry_frame,
+gui.go_button = tk.Button(gui.entry_frame,
     text=INITIAL_BUTTON_TEXT,
     command=find_paths_closure)
-go_button.grid(row=1, column=5)
+gui.go_button.grid(row=1, column=5)
 
 # initial graph display
-def show_graph():
+def show_graph(gui):
     graph_img = tk.PhotoImage(file="mygraph.gif")
-    graph_lbl = tk.Label(image=graph_img)
-    graph_lbl.grid(column=1, row=2)
-show_graph()
+    gui.graph_lbl = tk.Label(image=graph_img)
+    gui.graph_lbl.grid(column=1, row=2)
+show_graph(gui)
 
 # Prolog helper
 def get_edges(src_node):
    return iter(edges[src_node])
 
 # Called when the "find paths" button is clicked for the first time
-def find_paths(top, engine, nodes, edges, from_entry,
-        max_spin, go_button, status_lbl):
+def find_paths(gui, engine, nodes, edges):
     paths = e.db.path.iter
-    sol_iter = paths(from_entry.get(), None, int(max_spin.get()), None)
-    generator = cycle_results(top, sol_iter, nodes, edges, status_lbl)
+    sol_iter = paths(gui.from_entry.get(), None, int(gui.max_spin.get()), None)
+    generator = cycle_results(gui, sol_iter, nodes, edges)
 
     # Now we have result iterator, we change the function of the button.
     # Each press will find another path until no more.
-    def new_button_command(generator, from_entry, max_spin, button):
+    def new_button_command(gui, generator):
         try:
             generator.next()
         except StopIteration:
             # Once exhausted, revert button to initaial function
-            go_button["command"] = find_paths_closure
-            go_button["text"] = INITIAL_BUTTON_TEXT
+            gui.go_button["command"] = find_paths_closure
+            gui.go_button["text"] = INITIAL_BUTTON_TEXT
             # re-enable the user input widgets
-            from_entry["state"] = tk.NORMAL
-            max_spin["state"] = tk.NORMAL
-            status_lbl["text"] = INITIAL_STATUS_TEXT
+            gui.from_entry["state"] = tk.NORMAL
+            gui.max_spin["state"] = tk.NORMAL
+            gui.status_lbl["text"] = INITIAL_STATUS_TEXT
 
-    go_button["command"] = lambda : new_button_command(
-        generator, from_entry, max_spin, go_button)
-    go_button["text"] = NEXT_BUTTON_TEXT
+    gui.go_button["command"] = lambda : new_button_command(gui, generator)
+    gui.go_button["text"] = NEXT_BUTTON_TEXT
 
     # Dim out entries
-    from_entry["state"] = tk.DISABLED
-    max_spin["state"] = tk.DISABLED
+    gui.from_entry["state"] = tk.DISABLED
+    gui.max_spin["state"] = tk.DISABLED
 
     # show first path
-    new_button_command(generator, from_entry, max_spin, go_button)
+    new_button_command(gui, generator)
 
 # Generator pumped lazily to get next path.
 # Called when "next path" clicked
-def cycle_results(top, sol_iter, nodes, edges, status_lbl):
+def cycle_results(gui, sol_iter, nodes, edges):
     for (to, path) in sol_iter:
         gen_graph(edges, nodes, path)
-        show_graph()
-        status_lbl["text"] = str(path)
+        show_graph(gui)
+        gui.status_lbl["text"] = str(path)
         yield
     # reset
     gen_graph(edges, nodes)
-    show_graph()
+    show_graph(gui)
 
 # go
-top.mainloop()
+gui.top.mainloop()
