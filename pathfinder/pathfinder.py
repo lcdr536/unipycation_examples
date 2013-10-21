@@ -81,6 +81,7 @@ from_lbl = tk.Label(entry_frame, text="From:")
 from_lbl.grid(column=col, row=row)
 from_entry = tk.Entry(entry_frame)
 from_entry.grid(row=row, column=col+1)
+from_entry.insert(0, "d")
 col += 2
 
 #to_lbl = tk.Label(entry_frame, text="To:")
@@ -93,6 +94,7 @@ max_lbl = tk.Label(entry_frame, text="Max nodes:")
 max_lbl.grid(column=col, row=row)
 max_spin = tk.Spinbox(entry_frame, from_=0, to=9)
 max_spin.grid(row=row, column=col+1)
+for i in range(4): max_spin.invoke("buttonup")
 col += 2
 
 
