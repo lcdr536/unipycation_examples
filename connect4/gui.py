@@ -75,16 +75,17 @@ class Connect4(object):
         self._turn()
 
     def _turn(self):
-        # Not pretty, but works...
-        while True:
-            self.turn = not self.turn # flip turn
-            if self.ai_players[self.turn]:
-                self._set_status_text("%s AI thinking" % (self._player_colour().title()))
-                self._ai_turn()
-                if self._check_win(): break # did the AI player win?
-            else:
-                self._set_status_text("%s human move" % (self._player_colour().title()))
-                break # allow top loop to deal with human turn
+        self.turn = not self.turn # flip turn
+        if self.ai_players[self.turn]:
+            self._set_status_text("%s AI thinking" % (self._player_colour().title()))
+            self._ai_turn()
+            if not self._check_win():
+                # We need to allow the event handler to exit so that the GUI
+                # can redraw for example when changing desktops or covering
+                # and uncovering the game window.
+                self.top.after(0, self._turn)
+        else:
+            self._set_status_text("%s human move" % (self._player_colour().title()))
 
     def play(self):
         self._end()
