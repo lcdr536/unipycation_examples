@@ -83,12 +83,21 @@ insert_token(pos(Reds, Yellows, WhoseMove), Col, Move) :-
                          pos(Reds, [c(Col, Y) | Yellows], red),
                          WhoseMove, Move).
 
+% Nasty hack to work around lack of proper list conversion
+% over the language boundary. XXX
+shuffle(In, Out) :-
+    Hack =.. [xxx | In ],
+    python:shuffle_moves(Hack, Shuffled),
+    Shuffled =.. [ xxx | Out ].
+
 % Find all possible subsequent game states
 moves(pos(Reds, Yellows, _), []) :- % if someone won, dont collect moves
     has_won(Reds, Yellows, _), !.
+
 moves(Pos, Moves) :-
     board_width(Width), Col is Width - 1,
-    findall(Move, moves(Pos, Move, Col), Moves).
+    findall(Move, moves(Pos, Move, Col), MovesOrdered),
+    shuffle(MovesOrdered, Moves).
 
 moves(pos(Reds, Yellows, WhoseMove), Move, Col) :-
     board_width(W), Col < W, Col > -1,
