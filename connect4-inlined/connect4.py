@@ -1,8 +1,16 @@
 import Tkinter as tk
-import uni, sys
+import uni, sys, random
 
 ROWS = 6
 COLS = 7
+
+# Since there is no RNG is pyrolog, we let Python shuffle our list
+# XXX No proper list conversion from Prolog, so the list comes in as a
+# n-ary term, which we then shuffle and throw back.
+def shuffle_moves(moves_term):
+    l = list(moves_term)
+    random.shuffle(l)
+    return uni.CoreTerm("xxx", l)
 
 def token_click_closure(c4, colno):
     return lambda : c4._player_turn(colno)
@@ -151,12 +159,21 @@ insert_token(pos(Reds, Yellows, WhoseMove), Col, Move) :-
                          pos(Reds, [c(Col, Y) | Yellows], red),
                          WhoseMove, Move).
 
+% Nasty hack to work around lack of proper list conversion
+% over the language boundary. XXX
+shuffle(In, Out) :-
+    Hack =.. [xxx | In ],
+    python:shuffle_moves(Hack, Shuffled),
+    Shuffled =.. [ xxx | Out ].
+
 % Find all possible subsequent game states
 moves(pos(Reds, Yellows, _), []) :- % if someone won, dont collect moves
     has_won(Reds, Yellows, _), !.
+
 moves(Pos, Moves) :-
     board_width(Width), Col is Width - 1,
-    findall(Move, moves(Pos, Move, Col), Moves).
+    findall(Move, moves(Pos, Move, Col), MovesOrdered),
+    shuffle(MovesOrdered, Moves).
 
 moves(pos(Reds, Yellows, WhoseMove), Move, Col) :-
     board_width(W), Col < W, Col > -1,
@@ -230,16 +247,17 @@ test(GoodPos, Val) :-
         self._turn()
 
     def _turn(self):
-        # Not pretty, but works...
-        while True:
-            self.turn = not self.turn # flip turn
-            if self.ai_players[self.turn]:
-                self._set_status_text("%s AI thinking" % (self._player_colour().title()))
-                self._ai_turn()
-                if self._check_win(): break # did the AI player win?
-            else:
-                self._set_status_text("%s human move" % (self._player_colour().title()))
-                break # allow top loop to deal with human turn
+        self.turn = not self.turn # flip turn
+        if self.ai_players[self.turn]:
+            self._set_status_text("%s AI thinking" % (self._player_colour().title()))
+            self._ai_turn()
+            if not self._check_win():
+                # We need to allow the event handler to exit so that the GUI
+                # can redraw for example when changing desktops or covering
+                # and uncovering the game window.
+                self.top.after(0, self._turn)
+        else:
+            self._set_status_text("%s human move" % (self._player_colour().title()))
 
     def play(self):
         self._end()
