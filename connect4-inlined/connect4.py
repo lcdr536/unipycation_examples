@@ -23,24 +23,33 @@ class Connect4(object):
         self.top.title("Unipycation: Connect 4 GUI (Python)")
 
         self.pl_engine = uni.Engine("""
-
 % Figure 22.5  An implementation of the alpha-beta algorithm.
 % Based upon code from the book:
 % Prolog Programming for Artificial Intelligence
 % http://www.iro.umontreal.ca/~nie/IFT3335/Bratko/fig22_5.pl
 
 % The alpha-beta algorithm
+
+:- module(minimax, [alphabeta/6]).
+
 alphabeta(Pos, Alpha, Beta, GoodPos, Val, Depth)  :-
-    user:moves(Pos, PosList), !,
-    Depth0 is Depth - 1,
-    alphabetamoves(PosList, Pos, Alpha, Beta, GoodPos, Val, Depth0).
+    moves(Pos, PosList), !,
+    length(PosList, NumMoves),
+    (
+        NumMoves = 1 -> ( % Single move left, return it
+            PosList = [ GoodPos ], Val = 0
+        ); (
+            Depth0 is Depth - 1,
+            alphabetamoves(PosList, Pos, Alpha, Beta, GoodPos, Val, Depth0)
+        )
+    ).
 
 alphabetamoves([], Pos, _, _, _, Val, _)  :-
-    user:staticval(Pos, Val), !.                              % Static value of Pos
+    staticval(Pos, Val), !.                              % Static value of Pos
 
 alphabetamoves(PosList, Pos, Alpha, Beta, GoodPos, Val, Depth)  :-
     Depth =< 0 ->
-        user:staticval(Pos, Val)
+        staticval(Pos, Val)
     ;
         boundedbest(PosList, Alpha, Beta, GoodPos, Val, Depth).
 
@@ -51,9 +60,9 @@ boundedbest([Pos | PosList], Alpha, Beta, GoodPos, GoodVal, Depth)  :-
 goodenough([], _, _, Pos, Val, Pos, Val, _)  :-  !.    % No other candidate
 
 goodenough(_, Alpha, Beta, Pos, Val, Pos, Val, _)  :-
-    user:min_to_move(Pos), Val > Beta, !                   % Maximizer attained upper bound
+    min_to_move(Pos), Val > Beta, !                   % Maximizer attained upper bound
     ;
-    user:max_to_move(Pos), Val < Alpha, !.                 % Minimizer attained lower bound
+    max_to_move(Pos), Val < Alpha, !.                 % Minimizer attained lower bound
 
 goodenough(PosList, Alpha, Beta, Pos, Val, GoodPos, GoodVal, Depth)  :-
     newbounds(Alpha, Beta, Pos, Val, NewAlpha, NewBeta),    % Refine bounds
@@ -61,21 +70,22 @@ goodenough(PosList, Alpha, Beta, Pos, Val, GoodPos, GoodVal, Depth)  :-
     betterof(Pos, Val, Pos1, Val1, GoodPos, GoodVal).
 
 newbounds(Alpha, Beta, Pos, Val, Val, Beta)  :-
-    user:min_to_move(Pos), Val > Alpha, !.                 % Maximizer increased lower bound
+    min_to_move(Pos), Val > Alpha, !.                 % Maximizer increased lower bound
 
 newbounds(Alpha, Beta, Pos, Val, Alpha, Val)  :-
-     user:max_to_move(Pos), Val < Beta, !.                 % Minimizer decreased upper bound
+     max_to_move(Pos), Val < Beta, !.                 % Minimizer decreased upper bound
 
 newbounds(Alpha, Beta, _, _, Alpha, Beta).          % Otherwise bounds unchanged
 
 betterof(Pos, Val, _Pos1, Val1, Pos, Val)  :-        % Pos better than Pos1
-    user:min_to_move(Pos), Val > Val1, !
+    min_to_move(Pos), Val > Val1, !
     ;
-    user:max_to_move(Pos), Val < Val1, !.
+    max_to_move(Pos), Val < Val1, !.
 
 betterof(_, _, Pos1, Val1, Pos1, Val1).             % Otherwise Pos1 better
 
-% Code below here is our own
+% our code below
+
 board_width(7).
 board_height(6).
 
@@ -221,27 +231,34 @@ test(GoodPos, Val) :-
         self.status_text = tk.Label(self.top, text="---")
         self.status_text.grid(column=COLS, row=1)
 
+        self.default_button_bg = self.top.cget('bg')
+
     def _set_status_text(self, text):
         self.status_text["text"] = text
 
-    def _end(self, winner_colour=None):
+    def insertion_button_states(self, state):
         for i in self.insert_buttons:
-            i["state"] = tk.DISABLED
+            i["state"] = tk.NORMAL if state else tk.DISABLED
+
+    def _end(self, winner_colour=None, initial=False):
+        self.insertion_button_states(False)
+        if initial: return
 
         if winner_colour is not None:
             self.new_game_button["background"] = winner_colour
             self._set_status_text("%s wins" % winner_colour)
+        else:
+            self._set_status_text("stale mate")
 
     def _new(self):
         self.turn = False # first call to _turn will flip to True
-        def_bg = self.top.cget('bg')
-        for i in self.insert_buttons: i["state"] = tk.NORMAL
+        self.insertion_button_states(True)
 
         for col in self.cols:
             for b in col:
-                b["background"] = def_bg
+                b["background"] = self.default_button_bg
 
-        self.new_game_button["background"] = def_bg
+        self.new_game_button["background"] = self.default_button_bg
         self._set_status_text("Your move")
 
         self._turn()
@@ -251,6 +268,7 @@ test(GoodPos, Val) :-
         if self.ai_players[self.turn]:
             self._set_status_text("%s AI thinking" % (self._player_colour().title()))
             self._ai_turn()
+
             if not self._check_win():
                 # We need to allow the event handler to exit so that the GUI
                 # can redraw for example when changing desktops or covering
@@ -258,9 +276,10 @@ test(GoodPos, Val) :-
                 self.top.after(0, self._turn)
         else:
             self._set_status_text("%s human move" % (self._player_colour().title()))
+            self.insertion_button_states(True)
 
     def play(self):
-        self._end()
+        self._end(initial=True)
         self.top.mainloop()
 
     def _collect_token_coords(self, colour):
@@ -268,6 +287,15 @@ test(GoodPos, Val) :-
         assert colour in ["red", "yellow"]
         return [ (x, y) for x in range(COLS) for y in range(ROWS)
                 if self.cols[x][y]["background"] == colour ]
+
+    def _count_max_moves_left(self):
+        m = 0
+        for x in range(COLS):
+            for y in range(ROWS):
+                if self.cols[x][y]["background"] == self.default_button_bg:
+                    m += 1
+                if m == self.UI_DEPTH: return m # no need to search further
+        return m
 
     def _update_from_pos_one_colour(self, pylist, colour):
         assert colour in ["red", "yellow"]
@@ -288,13 +316,18 @@ test(GoodPos, Val) :-
     def _ai_turn(self):
         """ Let the AI take their turn. Uses minimax """
 
+        self.insertion_button_states(False)
         self.top.update_idletasks() # redraw so we can see player's move
 
         # encode the current board and whose move (yellow for ai)
         (reds, yellows) = self._counters_to_terms()
         pos = self.pl_engine.terms.pos(reds, yellows, self._player_colour())
 
-        (goodpos, val) = self.pl_engine.db.alphabeta(pos, -99999, 99999, None, None, Connect4.UI_DEPTH)
+        moves_left = self._count_max_moves_left()
+        depth = min(Connect4.UI_DEPTH, moves_left)
+        res = self.pl_engine.db.alphabeta(pos, -99999, 99999, None, None, depth)
+
+        (goodpos, val) = res
         self._update_from_pos(goodpos)
 
     def _player_turn(self, colno):
@@ -318,8 +351,13 @@ test(GoodPos, Val) :-
         return (reds, yellows)
 
     def _check_win(self):
-        (reds, yellows) = self._counters_to_terms()
 
+        moves_left = self._count_max_moves_left()
+        if moves_left == 0:
+            self._end()
+            return True
+
+        (reds, yellows) = self._counters_to_terms()
         res = self.pl_engine.db.has_won(reds, yellows, None)
         if res is not None:
             (winner, ) = res
