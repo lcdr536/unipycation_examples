@@ -54,10 +54,12 @@ class Connect4(object):
     def _set_status_text(self, text):
         self.status_text["text"] = text
 
-    def _end(self, winner_colour=None, initial=False):
+    def insertion_button_states(self, state):
         for i in self.insert_buttons:
-            i["state"] = tk.DISABLED
+            i["state"] = tk.NORMAL if state else tk.DISABLED
 
+    def _end(self, winner_colour=None, initial=False):
+        self.insertion_button_states(False)
         if initial: return
 
         if winner_colour is not None:
@@ -68,7 +70,7 @@ class Connect4(object):
 
     def _new(self):
         self.turn = False # first call to _turn will flip to True
-        for i in self.insert_buttons: i["state"] = tk.NORMAL
+        self.insertion_button_states(True)
 
         for col in self.cols:
             for b in col:
@@ -92,6 +94,7 @@ class Connect4(object):
                 self.top.after(0, self._turn)
         else:
             self._set_status_text("%s human move" % (self._player_colour().title()))
+            self.insertion_button_states(True)
 
     def play(self):
         self._end(initial=True)
@@ -131,6 +134,7 @@ class Connect4(object):
     def _ai_turn(self):
         """ Let the AI take their turn. Uses minimax """
 
+        self.insertion_button_states(False)
         self.top.update_idletasks() # redraw so we can see player's move
 
         # encode the current board and whose move (yellow for ai)
