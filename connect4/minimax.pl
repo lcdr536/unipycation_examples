@@ -9,8 +9,15 @@
 
 alphabeta(Pos, Alpha, Beta, GoodPos, Val, Depth)  :-
     user:moves(Pos, PosList), !,
-    Depth0 is Depth - 1,
-    alphabetamoves(PosList, Pos, Alpha, Beta, GoodPos, Val, Depth0).
+    length(PosList, NumMoves),
+    (
+        NumMoves = 1 -> ( % Single move left, return it
+            PosList = [ GoodPos ], Val = 0
+        ); (
+            Depth0 is Depth - 1,
+            alphabetamoves(PosList, Pos, Alpha, Beta, GoodPos, Val, Depth0)
+        )
+    ).
 
 alphabetamoves([], Pos, _, _, _, Val, _)  :-
     user:staticval(Pos, Val), !.                              % Static value of Pos

@@ -49,27 +49,32 @@ class Connect4(object):
         self.status_text = tk.Label(self.top, text="---")
         self.status_text.grid(column=COLS, row=1)
 
+        self.default_button_bg = self.top.cget('bg')
+
     def _set_status_text(self, text):
         self.status_text["text"] = text
 
-    def _end(self, winner_colour=None):
+    def _end(self, winner_colour=None, initial=False):
         for i in self.insert_buttons:
             i["state"] = tk.DISABLED
+
+        if initial: return
 
         if winner_colour is not None:
             self.new_game_button["background"] = winner_colour
             self._set_status_text("%s wins" % winner_colour)
+        else:
+            self._set_status_text("stale mate")
 
     def _new(self):
         self.turn = False # first call to _turn will flip to True
-        def_bg = self.top.cget('bg')
         for i in self.insert_buttons: i["state"] = tk.NORMAL
 
         for col in self.cols:
             for b in col:
-                b["background"] = def_bg
+                b["background"] = self.default_button_bg
 
-        self.new_game_button["background"] = def_bg
+        self.new_game_button["background"] = self.default_button_bg
         self._set_status_text("Your move")
 
         self._turn()
@@ -79,6 +84,7 @@ class Connect4(object):
         if self.ai_players[self.turn]:
             self._set_status_text("%s AI thinking" % (self._player_colour().title()))
             self._ai_turn()
+
             if not self._check_win():
                 # We need to allow the event handler to exit so that the GUI
                 # can redraw for example when changing desktops or covering
@@ -88,7 +94,7 @@ class Connect4(object):
             self._set_status_text("%s human move" % (self._player_colour().title()))
 
     def play(self):
-        self._end()
+        self._end(initial=True)
         self.top.mainloop()
 
     def _collect_token_coords(self, colour):
@@ -96,6 +102,15 @@ class Connect4(object):
         assert colour in ["red", "yellow"]
         return [ (x, y) for x in range(COLS) for y in range(ROWS)
                 if self.cols[x][y]["background"] == colour ]
+
+    def _count_max_moves_left(self):
+        m = 0
+        for x in range(COLS):
+            for y in range(ROWS):
+                if self.cols[x][y]["background"] == self.default_button_bg:
+                    m += 1
+                if m == self.UI_DEPTH: return m # no need to search further
+        return m
 
     def _update_from_pos_one_colour(self, pylist, colour):
         assert colour in ["red", "yellow"]
@@ -122,7 +137,11 @@ class Connect4(object):
         (reds, yellows) = self._counters_to_terms()
         pos = self.pl_engine.terms.pos(reds, yellows, self._player_colour())
 
-        (goodpos, val) = self.pl_engine.db.alphabeta(pos, -99999, 99999, None, None, Connect4.UI_DEPTH)
+        moves_left = self._count_max_moves_left()
+        depth = min(Connect4.UI_DEPTH, moves_left)
+        res = self.pl_engine.db.alphabeta(pos, -99999, 99999, None, None, depth)
+
+        (goodpos, val) = res
         self._update_from_pos(goodpos)
 
     def _player_turn(self, colno):
@@ -146,8 +165,13 @@ class Connect4(object):
         return (reds, yellows)
 
     def _check_win(self):
-        (reds, yellows) = self._counters_to_terms()
 
+        moves_left = self._count_max_moves_left()
+        if moves_left == 0:
+            self._end()
+            return True
+
+        (reds, yellows) = self._counters_to_terms()
         res = self.pl_engine.db.has_won(reds, yellows, None)
         if res is not None:
             (winner, ) = res
