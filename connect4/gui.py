@@ -5,12 +5,10 @@ ROWS = 6
 COLS = 7
 
 # Since there is no RNG is pyrolog, we let Python shuffle our list
-# XXX No proper list conversion from Prolog, so the list comes in as a
-# n-ary term, which we then shuffle and throw back.
-def shuffle_moves(moves_term):
-    l = list(moves_term)
+def shuffle(moves):
+    l = list(moves) # copy
     random.shuffle(l)
-    return uni.CoreTerm("xxx", l)
+    return l
 
 def token_click_closure(c4, colno):
     return lambda : c4._player_turn(colno)
