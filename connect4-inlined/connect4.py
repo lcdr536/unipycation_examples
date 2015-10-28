@@ -5,12 +5,9 @@ ROWS = 6
 COLS = 7
 
 # Since there is no RNG is pyrolog, we let Python shuffle our list
-# XXX No proper list conversion from Prolog, so the list comes in as a
-# n-ary term, which we then shuffle and throw back.
-def shuffle_moves(moves_term):
-    l = list(moves_term)
+def shuffle_moves(l):
     random.shuffle(l)
-    return uni.CoreTerm("xxx", l)
+    return l
 
 def token_click_closure(c4, colno):
     return lambda : c4._player_turn(colno)
@@ -169,12 +166,8 @@ insert_token(pos(Reds, Yellows, WhoseMove), Col, Move) :-
                          pos(Reds, [c(Col, Y) | Yellows], red),
                          WhoseMove, Move).
 
-% Nasty hack to work around lack of proper list conversion
-% over the language boundary. XXX
 shuffle(In, Out) :-
-    Hack =.. [xxx | In ],
-    python:shuffle_moves(Hack, Shuffled),
-    Shuffled =.. [ xxx | Out ].
+    python:shuffle_moves(In, Out).
 
 % Find all possible subsequent game states
 moves(pos(Reds, Yellows, _), []) :- % if someone won, dont collect moves
@@ -191,6 +184,7 @@ moves(pos(Reds, Yellows, WhoseMove), Move, Col) :-
     \+ member(c(Col, 0), Reds),
     \+ member(c(Col, 0), Yellows),
     insert_token(pos(Reds, Yellows, WhoseMove), Col, Move). % space in this col
+
 moves(pos(Reds, Yellows, WhoseMove), Move, Col) :-
     Col > -1, NextCol is Col - 1,
     moves(pos(Reds, Yellows, WhoseMove), Move, NextCol). % search next col
