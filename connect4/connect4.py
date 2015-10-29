@@ -26,8 +26,18 @@ class Connect4(object):
 % http://www.iro.umontreal.ca/~nie/IFT3335/Bratko/fig22_5.pl
 
 % The alpha-beta algorithm
-
-:- module(minimax, [alphabeta/6]).
+alphabeta_with_shuffle(Pos, Alpha, Beta, GoodPos, Val, Depth)  :-
+    moves(Pos, MovesOrdered), !,
+    shuffle(MovesOrdered, PosList),
+    length(PosList, NumMoves),
+    (
+        NumMoves = 1 -> ( % Single move left, return it
+            PosList = [ GoodPos ], Val = 0
+        ); (
+            Depth0 is Depth - 1,
+            alphabetamoves(PosList, Pos, Alpha, Beta, GoodPos, Val, Depth0)
+        )
+    ).
 
 alphabeta(Pos, Alpha, Beta, GoodPos, Val, Depth)  :-
     moves(Pos, PosList), !,
@@ -175,8 +185,7 @@ moves(pos(Reds, Yellows, _), []) :- % if someone won, dont collect moves
 
 moves(Pos, Moves) :-
     board_width(Width), Col is Width - 1,
-    findall(Move, moves(Pos, Move, Col), MovesOrdered),
-    shuffle(MovesOrdered, Moves).
+    findall(Move, moves(Pos, Move, Col), Moves).
 
 moves(pos(Reds, Yellows, WhoseMove), Move, Col) :-
     board_width(W), Col < W, Col > -1,
@@ -319,7 +328,7 @@ test(GoodPos, Val) :-
 
         moves_left = self._count_max_moves_left()
         depth = min(Connect4.UI_DEPTH, moves_left)
-        res = self.pl_engine.db.alphabeta(pos, -99999, 99999, None, None, depth)
+        res = self.pl_engine.db.alphabeta_with_shuffle(pos, -99999, 99999, None, None, depth)
 
         (goodpos, val) = res
         self._update_from_pos(goodpos)
